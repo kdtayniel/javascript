@@ -1,0 +1,1620 @@
+javascript:(function(){const s=document.documentElement.style;s.backgroundColor='black';s.filter='invert(100%)';})();void 0;
+(색깔 반전)
+
+javascript:(function(){const s=document.documentElement.style;s.backgroundColor='';s.filter='invert(0%)';})();void 0;
+(되돌리기)
+
+(function() {
+    // 이미 실행 중인 깜빡임이 있다면 제거
+    if (window.blinkInterval) {
+        clearInterval(window.blinkInterval);
+    }
+    
+    const html = document.documentElement;
+    let inverted = false;
+
+    // 0.1초(100ms)마다 화면을 반전시킵니다.
+    window.blinkInterval = setInterval(() => {
+        if (!inverted) {
+            html.style.filter = 'invert(100%)';
+            html.style.backgroundColor = 'black';
+        } else {
+            html.style.filter = '';
+            html.style.backgroundColor = '';
+        }
+        inverted = !inverted;
+    }, 100); // 속도 조절: 100을 50으로 줄이면 2배 더 빠르게 깜빡입니다.
+})();
+(화면 반전 깜박임)
+
+clearInterval(window.blinkInterval);
+document.documentElement.style.filter = '';
+document.documentElement.style.backgroundColor = '';
+(화면 반전 깜박임 멈춤)
+
+function backupSpreadsheet() {
+  var fileId = SpreadsheetApp.getActiveSpreadsheet().getId();
+  var file = DriveApp.getFileById(fileId);
+  
+  // 백업 파일이 저장될 구글 드라이브 폴더 ID
+  var folderId = "여기에_구글_드라이브_폴더_ID를_넣으세요";
+  var folder = DriveApp.getFolderById(folderId);
+  
+  // 오늘 날짜를 구해서 파일 이름에 붙임
+  var formattedDate = Utilities.formatDate(new Date(), "GMT+9", "yyyy-MM-dd");
+  var backupName = file.getName() + "_백업_" + formattedDate;
+  
+  // 복사본 생성 후 해당 폴더로 이동
+  file.makeCopy(backupName, folder);
+}
+(백업)
+
+const formatCurrency = (amount) => {
+  return Number(amount).toLocaleString('ko-KR');
+};
+
+console.log(formatCurrency(1,250,000)); // "1,250,000"
+(숫자 콤마)
+
+const arr = ['사과', '바나나', '사과', '오렌지', '바나나'];
+
+const uniqueArr = [...new Set(arr)];
+
+console.log(uniqueArr); // ['사과', '바나나', '오렌지']
+(배열 중복 요소 제거하기)
+
+const products = [
+  { name: '노트북', category: '전자기기' },
+  { name: '셔츠', category: '의류' },
+  { name: '스마트폰', category: '전자기기' },
+  { name: '바지', category: '의류' }
+];
+
+// 최신 자바스크립트 표준(ES2024) 내장 기능 사용
+const grouped = Object.groupBy(products, product => product.category);
+
+/* 출력 결과:
+{
+  전자기기: [{ name: '노트북', ... }, { name: '스마트폰', ... }],
+  의류: [{ name: '셔츠', ... }, { name: '바지', ... }]
+}
+*/
+(배열 데이터를 조건에 맞게 묶기)
+
+const shuffleArray = (array) => {
+  const newArray = [...array]; // 원본 훼손 방지
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // 구조 분해 할당으로 교환
+  }
+  return newArray;
+};
+
+console.log(shuffleArray([1, 2, 3, 4, 5])); // 예: [3, 5, 1, 4, 2]
+*(배열 무작위로 섞기)
+
+const startCountdown = (durationInSeconds, displayElement) => {
+  let timer = durationInSeconds;
+  
+  const interval = setInterval(() => {
+    const minutes = Math.floor(timer / 60);
+    const seconds = timer % 60;
+
+    // 한 자릿수일 때 앞에 0 붙이기 (예: 05:09)
+    const displayMin = String(minutes).padStart(2, '0');
+    const displaySec = String(seconds).padStart(2, '0');
+
+    displayElement.textContent = `${displayMin}:${displaySec}`;
+
+    if (--timer < 0) {
+      clearInterval(interval);
+      displayElement.textContent = "시간 만료";
+      alert("제한 시간이 초과되었습니다.");
+    }
+  }, 1000);
+};
+
+// 사용 예시: 3분(180초) 카운트다운 시작
+// startCountdown(180, document.querySelector('#timer'));
+(남은 시간 카운트다운 타이머)
+
+window.addEventListener('keydown', (e) => {
+  // Ctrl + S (Mac은 Command + S) 감지
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault(); // 브라우저 기본 저장창 차단
+    console.log('데이터가 임시 저장되었습니다.');
+  }
+
+  // Esc 키 감지
+  if (e.key === 'Escape') {
+    console.log('열려 있는 모달창을 닫습니다.');
+  }
+});
+(단축키 바인딩)
+
+// 마우스 우클릭 방지
+document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  alert('우클릭을 사용할 수 없는 페이지입니다.');
+});
+
+// 드래그 및 복사 방지
+document.addEventListener('selectstart', (e) => {
+  e.preventDefault();
+});
+(마우스 우클릭 및 드래그 차단)
+
+window.addEventListener('beforeunload', (e) => {
+  // 표준 스펙에 따라 아래 설정을 해주면 브라우저 자체 이탈 경고창이 뜹니다.
+  e.preventDefault();
+  e.returnValue = ''; 
+});
+(브라우저 이탈 방지)
+
+javascript:(function(){const el=document.createElement('style');el.innerHTML='html,body,div,p,span,h1,h2,h3,article,section{background-color:#121212 !important;color:#ececec !important;}a{color:#3085fe !important;}img,video{opacity:0.8;}';document.head.appendChild(el);})();
+(다크모드)
+
+javascript:(function(){const styles=document.getElementsByTagName('style');for(let i=styles.length-1;i>=0;i--){if(styles[i].innerHTML.includes('#121212')){styles[i].remove();}}})();
+(다크모드 되돌리기)
+
+document.querySelectorAll('img').forEach(img => {
+  img.style.transition = 'transform 2s linear';
+  let angle = 0;
+  setInterval(() => {
+    angle += 360;
+    img.style.transform = `rotate(${angle}deg)`;
+  }, 2000);
+});
+(화면 돌아가기)
+
+(function() {
+  const secretTitle = "background: #222; color: #bada55; font-size: 16px; padding: 4px 8px; border-radius: 4px;";
+  const systemLog = "color: #00d2ff; font-weight: bold;";
+  const winLog = "background: #4CAF50; color: white; font-size: 18px; font-weight: bold; padding: 10px;";
+ 
+  const target = Math.floor(Math.random() * 100) + 1;
+  let attempts = 0;
+
+  console.clear();
+  console.log("%c 🎲 콘솔 UP & DOWN 게임을 시작합니다! 🎲 ", secretTitle);
+  console.log("%c1부터 100 사이의 숫자를 맞추는 게임입니다.", systemLog);
+  console.log("%c정답을 입력하려면 아래 콘솔창에 guess(숫자)를 입력하고 Enter를 누르세요!\n예시: guess(50)", "color: #ff007f; font-weight: bold;");
+
+  // 사용자가 입력할 수 있도록 전역 함수 등록
+  window.guess = function(num) {
+    if (typeof num !== 'number' || num < 1 || num > 100 || isNaN(num)) {
+      console.log("%c⚠️ 1부터 100 사이의 올바른 '숫자'를 입력해 주세요! 예: guess(50)", "color: orange;");
+      return "올바른 숫자가 아닙니다.";
+    }
+
+    attempts++;
+
+    if (num === target) {
+      console.clear();
+      console.log(`%c🎉 축하합니다! 정답입니다! 🎉\n정답: ${target} | 시도 횟수: ${attempts}번`, winLog);
+      console.log("%c다시 게임을 하려면 페이지를 새로고침(F5) 해주세요.", systemLog);
+      delete window.guess; // 게임 종료 후 함수 제거
+      return "GAME CLEAR!";
+    } else if (num < target) {
+      console.log(`%c[${attempts}번째 시도] ${num} ➡️ UP! 더 큰 숫자입니다. ↑`, "color: #e91e63; font-weight: bold;");
+      return "더 높은 숫자를 입력하세요.";
+    } else {
+      console.log(`%c[${attempts}번째 시+도] ${num} ➡️ DOWN! 더 작은 숫자입니다. ↓`, "color: #3f51b5; font-weight: bold;");
+      return "더 낮은 숫자를 입력하세요.";
+    }
+  };
+})();
+(숫자 맞추기 놀이)
+
+function sayHello(userName) {
+    return `안녕하세요, ${userName}님!`;
+}
+console.log(sayHello(name)); // "안녕하세요, 주인님!" 출력
+(함수 (재사용하는 코드 묶음))
+
+(function startConsoleGame() {
+    alert("⚔️ 자바스크립트 콘솔 RPG에 오신 것을 환영합니다! \n개발자 도구(F12)의 'Console' 탭에서 진행됩니다.");
+    
+    let player = { hp: 100, maxHp: 100, atk: 15, lv: 1, exp: 0 };
+    let boss = { name: "🔥 최종 보스 드래곤", hp: 180, atk: 25 };
+    let stages = ["🦇 박쥐", "🐺 늑대", "👹 고블린"];
+    
+    console.clear();
+    console.log("%c🎮 GAME START 🎮", "color: #00ff00; font-size: 20px; font-weight: bold;");
+    showStatus();
+
+    function showStatus() {
+        console.log(`%c[내 정보] LV: ${player.lv} | HP: ${player.hp}/${player.maxHp} | ATK: ${player.atk} | EXP: ${player.exp}/100`, "color: #00ffff;");
+    }
+
+    function getRPSSelection(msg) {
+        while (true) {
+            let input = prompt(`${msg}\n1: 가위 | 2: 바위 | 3: 보 (숫자 입력)`);
+            if (input === null) return null;
+            if (["1", "2", "3"].includes(input.trim())) {
+                return ["가위", "바위", "보"][parseInt(input) - 1];
+            }
+            alert("잘못된 입력입니다! 1, 2, 3 중에서 입력해주세요.");
+        }
+    }
+
+    function battle(enemyName, enemyHp, enemyAtk, isBoss = false) {
+        console.log(`\n%c🚨 ${enemyName}(이)가 나타났다! (HP: ${enemyHp} / ATK: ${enemyAtk})`, "color: #ff9900; font-weight: bold;");
+        
+        while (player.hp > 0 && enemyHp > 0) {
+            let pChoice = getRPSSelection(`⚔️ ${enemyName} 대치 중! 무엇을 내시겠습니까?`);
+            if (!pChoice) {
+                console.log("%c🏳️ 게임을 포기하셨습니다.", "color: #aaaaaa;");
+                return false;
+            }
+
+            const rps = ["가위", "바위", "보"];
+            let eChoice = rps[Math.floor(Math.random() * 3)];
+            console.log(`👉 나: [${pChoice}] vs ${enemyName}: [${eChoice}]`);
+
+            if (pChoice === eChoice) {
+                console.log("🤝 비겼습니다! 다시 패를 고릅니다.");
+            } else if (
+                (pChoice === "가위" && eChoice === "보") ||
+                (pChoice === "바위" && eChoice === "가위") ||
+                (pChoice === "보" && eChoice === "바위")
+            ) {
+                // 플레이어 승리 (공격)
+                let damage = player.atk + Math.floor(Math.random() * 6);
+                enemyHp -= damage;
+                console.log(`%c⚔️ 적중! [${pChoice}]로 이겨서 ${damage}의 데미지를 입혔습니다. (적 HP: ${Math.max(0, enemyHp)})`, "color: #00ff00;");
+            } else {
+                // 적 승리 (피격)
+                let damage = enemyAtk + Math.floor(Math.random() * 4);
+                player.hp -= damage;
+                console.log(`%c💥 으악! [${pChoice}]로 져서 ${damage}의 데미지를 입었습니다. (내 HP: ${Math.max(0, player.hp)})`, "color: #ff0000;");
+            }
+        }
+
+        if (player.hp <= 0) {
+            console.log("%c💀 당신은 쓰러졌습니다... GAME OVER 💀", "color: #ff0000; font-size: 16px; font-weight: bold;");
+            return false;
+        }
+
+        console.log(`%c🎉 ${enemyName} 격파 완료!`, "color: #00ff00; font-weight: bold;");
+        if (!isBoss) {
+            player.exp += 40;
+            player.hp = Math.min(player.maxHp, player.hp + 20); // 승리 시 소량 회복
+            console.log("❤️ 체력을 20 회복했습니다.");
+            
+            if (player.exp >= 100) {
+                player.lv++;
+                player.maxHp += 20;
+                player.hp = player.maxHp;
+                player.atk += 5;
+                player.exp -= 100;
+                console.log(`%c🆙 LEVEL UP! 레벨 ${player.lv}이 되었습니다! (HP/ATK 상승)`, "color: #ffff00; font-weight: bold;");
+            }
+            showStatus();
+        }
+        return true;
+    }
+
+    // 메인 루프 실행
+    setTimeout(() => {
+        // 일반 스테이지
+        for (let i = 0; i < stages.length; i++) {
+            let enemyName = stages[i];
+            let enemyHp = 40 + i * 20;
+            let enemyAtk = 10 + i * 3;
+            
+            alert(`제 ${i+1}구역: ${enemyName} 사냥을 시작합니다.`);
+            let success = battle(enemyName, enemyHp, enemyAtk);
+            if (!success) return;
+        }
+
+        // 보스전
+        alert(`🚨 경고! 최종 보스 구역에 진입합니다! \n${boss.name}와의 결전!`);
+        let gameWin = battle(boss.name, boss.hp, boss.atk, true);
+        
+        if (gameWin) {
+            console.log("%c👑 축하합니다! 최종 보스를 물리치고 세상을 구했습니다! WINNER! 👑", "color: #ffff00; font-size: 20px; font-weight: bold;");
+        }
+    }, 500);
+})();
+(가위 바위 보 게임)
+
+(function startNumberBaseball() {
+    alert("⚾ 자바스크립트 숫자 야구 게임에 오신 것을 환영합니다! \nF12를 눌러 'Console' 탭을 확인하며 상단 입력창에 숫자를 입력하세요.");
+    
+    // [확실한 수정] 0부터 9까지의 숫자가 완벽히 채워진 배열입니다.
+    let numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let computerNumbers = [];
+    for (let i = 0; i < 4; i++) {
+        let randomIndex = Math.floor(Math.random() * numbers.length);
+        computerNumbers.push(numbers.splice(randomIndex, 1)[0]);
+    }
+
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    console.clear();
+    console.log("%c⚾ SHIFT HIT! 숫자 야구 게임 START ⚾", "color: #00ff00; font-size: 18px; font-weight: bold;");
+    console.log(`%c0부터 9까지 서로 다른 숫자 4자리를 맞추세요. (기회는 총 ${maxAttempts}번!)`, "color: #aaaaaa;");
+    console.log("--------------------------------------------------");
+
+    // 게임 루프 실행
+    while (attempts < maxAttempts) {
+        let input = prompt(`[${attempts + 1}/${maxAttempts}회차] 서로 다른 숫자 4자리를 입력하세요:\n(예시: 1234)`);
+        
+        if (input === null) {
+            console.log("%c🏳️ 게임을 기권하셨습니다.", "color: #aaaaaa;");
+            return;
+        }
+
+        let guess = input.trim();
+
+        if (guess.length !== 4 || isNaN(guess)) {
+            alert("❌ 정확히 4자리의 숫자를 입력해주세요!");
+            continue;
+        }
+
+        let guessArray = guess.split("").map(Number);
+        let hasDuplicate = new Set(guessArray).size !== 4;
+        if (hasDuplicate) {
+            alert("❌ 중복된 숫자가 있습니다! 서로 다른 숫자를 입력해주세요.");
+            continue;
+        }
+
+        attempts++;
+        
+        let strikes = 0;
+        let balls = 0;
+
+        for (let i = 0; i < 4; i++) {
+            if (guessArray[i] === computerNumbers[i]) {
+                strikes++;
+            } else if (computerNumbers.includes(guessArray[i])) {
+                balls++;
+            }
+        }
+
+        if (strikes === 4) {
+            console.log(`%c🎉 홈런! ${attempts}번 만에 정답(${guess})을 맞추셨습니다! 대단해요! 👑`, "color: #ffff00; font-size: 16px; font-weight: bold;");
+            alert(`🎉 홈런! 정답을 맞추셨습니다! (${attempts}회차 입력: ${guess})`);
+            return;
+        } else if (strikes === 0 && balls === 0) {
+            console.log(`%c[${attempts}회차] ${guess} ➡️ OUT (아웃!) ❌`, "color: #ff0000;");
+        } else {
+            console.log(`%c[${attempts}회차] ${guess} ➡️ ${strikes} Strike(S) | ${balls} Ball(B) ⚾`, "color: #00ffff;");
+        }
+    }
+
+    console.log("--------------------------------------------------");
+    console.log(`%c💀 아쉽게도 탈락하셨습니다... 정답은 [ ${computerNumbers.join("")} ] 이었습니다.`, "color: #ff3333; font-size: 16px; font-weight: bold;");
+    alert(`GAME OVER! 정답은 [ ${computerNumbers.join("")} ] 이었습니다.`);
+})();
+(숫자 야구 게임)
+
+(function startConsoleDodgeGame() {
+    console.clear();
+    alert("🎮 [콘솔 실시간 공 피하기 Game]\n\n조작 방법:\nA 키 : 왼쪽으로 이동\nD 키 : 오른쪽으로 이동\n\nF12 콘솔창을 넓게 열어두고 시작하세요!");
+
+    const WIDTH = 20; // 게임 화면 가로 크기
+    const HEIGHT = 12; // 게임 화면 세로 크기
+    let playerX = Math.floor(WIDTH / 2);
+    let score = 0;
+    let gameOver = false;
+    let gameLoopInterval = null;
+
+    // 공(장애물) 목록: {x, y, speed}
+    let balls = [];
+
+    // 키보드 입력 감지 (A, D 단 두 개만 사용)
+    function handleKeyDown(e) {
+        if (gameOver) return;
+        const key = e.key.toLowerCase();
+        if (key === 'a' || key === 'ㅁ') {
+            if (playerX > 0) playerX--;
+        } else if (key === 'd' || key === 'ㅇ') {
+            if (playerX < WIDTH - 1) playerX++;
+        }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+
+    // 게임 화면 렌더링 함수
+    function render() {
+        if (gameOver) return;
+
+        let board = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill("　"));
+        
+        // 플레이어 배치 (하단 끝줄)
+        board[HEIGHT - 1][playerX] = "🏃";
+
+        // 공 배치 및 충돌 검사
+        balls.forEach(ball => {
+            let bx = Math.floor(ball.x);
+            let by = Math.floor(ball.y);
+            if (by >= 0 && by < HEIGHT && bx >= 0 && bx < WIDTH) {
+                board[by][bx] = "🔴";
+            }
+        });
+
+        // 콘솔에 그리기 (매 프레임 clear 후 새로 출력)
+        console.clear();
+        console.log(`%c🏆 SCORE: ${score} 🏆  (A: 왼쪽 / D: 오른쪽)`, "color: #ffff00; font-size: 14px; font-weight: bold;");
+        console.log("┌" + "─".repeat(WIDTH * 2) + "┐");
+        
+        for (let y = 0; y < HEIGHT; y++) {
+            console.log("│" + board[y].join("") + "│");
+        }
+        
+        console.log("└" + "─".repeat(WIDTH * 2) + "┘");
+    }
+
+    // 메인 게임 로프 (0.1초마다 실행)
+    function update() {
+        score++;
+
+        // 확률적으로 새로운 공 생성 (위쪽에서 떨어짐)
+        if (Math.random() < 0.3) {
+            balls.push({
+                x: Math.floor(Math.random() * WIDTH),
+                y: 0,
+                speed: 0.5 + Math.random() * 0.5
+            });
+        }
+
+        // 공 위치 업데이트 및 화면 이탈 처리
+        balls.forEach(ball => {
+            ball.y += ball.speed;
+        });
+
+        // 플레이어와 공 충돌 체크
+        for (let i = 0; i < balls.length; i++) {
+            let ball = balls[i];
+            let bx = Math.floor(ball.x);
+            let by = Math.floor(ball.y);
+
+            // 맨 밑줄에 도달했을 때 플레이어 위치와 겹치면 충돌
+            if (by === HEIGHT - 1 && bx === playerX) {
+                endGame();
+                return;
+            }
+        }
+
+        // 화면 밖으로 나간 공 제거
+        balls = balls.filter(ball => ball.y < HEIGHT);
+
+        render();
+    }
+
+    // 게임 종료 처리
+    function endGame() {
+        gameOver = true;
+        clearInterval(gameLoopInterval);
+        window.removeEventListener('keydown', handleKeyDown);
+        
+        console.log("%c💥💥 COLLISION!! GAME OVER 💥💥", "color: #ff0000; font-size: 20px; font-weight: bold;");
+        console.log(`%c최종 점수: ${score}점`, "color: #00ff00; font-size: 16px; font-weight: bold;");
+        alert(`💥 으악! 공에 부딪혔습니다!\n최종 점수: ${score}점`);
+    }
+
+    // 게임 시작 구동
+    gameLoopInterval = setInterval(update, 100);
+})();
+(공 피하기 게임)
+
+(function startConsolePoopGame() {
+    console.clear();
+    alert("💩 [콘솔 실시간 똥피하기 Game]\n\n조작 방법:\nA 키 : 왼쪽으로 이동\nD 키 : 오른쪽으로 이동\n\n하늘에서 떨어지는 똥을 요리조리 피해보세요!");
+
+    const WIDTH = 22;  // 게임 화면 가로 크기
+    const HEIGHT = 14; // 게임 화면 세로 크기
+    let playerX = Math.floor(WIDTH / 2);
+    let score = 0;
+    let gameOver = false;
+    let gameLoopInterval = null;
+
+    // 똥 목록: {x, y, speed}
+    let poops = [];
+
+    // 키보드 입력 감지 (A, D)
+    function handleKeyDown(e) {
+        if (gameOver) return;
+        const key = e.key.toLowerCase();
+        if (key === 'a' || key === 'ㅁ') {
+            if (playerX > 0) playerX--;
+        } else if (key === 'd' || key === 'ㅇ') {
+            if (playerX < WIDTH - 1) playerX++;
+        }
+        render(); // 키 입력 시 즉시 화면 갱신해서 반응성 향상
+    }
+    window.addEventListener('keydown', handleKeyDown);
+
+    // 게임 화면 렌더링 함수
+    function render() {
+        if (gameOver) return;
+
+        let board = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill("　"));
+        
+        // 캐릭터 배치 (맨 아래 줄)
+        board[HEIGHT - 1][playerX] = "🏃";
+
+        // 똥 배치 및 충돌 검사
+        poops.forEach(poop => {
+            let px = Math.floor(poop.x);
+            let py = Math.floor(poop.y);
+            if (py >= 0 && py < HEIGHT && px >= 0 && px < WIDTH) {
+                board[py][px] = "💩";
+            }
+        });
+
+        // 콘솔 화면 갱신
+        console.clear();
+        console.log(`%c✨ 버틴 시간(SCORE): ${score} ✨  [ A: ◀ | D: ▶ ]`, "color: #ffff00; font-size: 14px; font-weight: bold;");
+        console.log("┌" + "─".repeat(WIDTH * 2) + "┐");
+        
+        for (let y = 0; y < HEIGHT; y++) {
+            console.log("│" + board[y].join("") + "│");
+        }
+        
+        console.log("└" + "─".repeat(WIDTH * 2) + "┘");
+    }
+
+    // 메인 게임 루프 (0.08초마다 실행 - 기존보다 더 빠름!)
+    function update() {
+        score++;
+
+        // 난이도 조절: 시간이 지날수록 새로운 똥이 더 자주 생성됨
+        let spawnChance = 0.3 + (score * 0.001);
+        if (Math.random() < Math.min(spawnChance, 0.7)) {
+            poops.push({
+                x: Math.floor(Math.random() * WIDTH),
+                y: 0,
+                // 각각 떨어지는 속도가 다름 (다이내믹한 낙하)
+                speed: 0.6 + Math.random() * 0.8
+            });
+        }
+
+        // 똥 위치 하강
+        poops.forEach(poop => {
+            poop.y += poop.speed;
+        });
+
+        // 충돌 체크
+        for (let i = 0; i < poops.length; i++) {
+            let poop = poops[i];
+            let px = Math.floor(poop.x);
+            let py = Math.floor(poop.y);
+
+            // 캐릭터 위치와 똥의 위치가 겹치면 종료
+            if (py === HEIGHT - 1 && px === playerX) {
+                endGame();
+                return;
+            }
+        }
+
+        // 화면 아래로 벗어난 똥 제거
+        poops = poops.filter(poop => poop.y < HEIGHT);
+
+        render();
+    }
+
+    // 게임 종료 처리
+    function endGame() {
+        gameOver = true;
+        clearInterval(gameLoopInterval);
+        window.removeEventListener('keydown', handleKeyDown);
+        
+        console.clear();
+        console.log("%c😭😭 으아악! 똥을 맞았습니다! 😭😭", "color: #ff5555; font-size: 20px; font-weight: bold;");
+        console.log(`%c최종 생존 점수: ${score}점`, "color: #ffff00; font-size: 16px; font-weight: bold;");
+        alert(`💩 으악! 똥을 피하지 못했습니다!\n최종 점수: ${score}점`);
+    }
+
+    // 게임 루프 구동 (80ms 주기)
+    gameLoopInterval = setInterval(update, 80);
+})();
+(똥 피하기)
+
+(function drawRedDenseDashSkull() {
+    console.clear();
+
+    const redDenseSkull = [
+        "                 ----------------------------                 ",
+        "            --------------------------------------            ",
+        "          ------------------------------------------          ",
+        "        ----------------------------------------------        ",
+        "      --------------------------------------------------      ",
+        "     ----------------------------------------------------     ",
+        "     ----------      --------------------      ----------     ",
+        "    -----------      --------------------      -----------    ",
+        "    -----------      --------------------      -----------    ",
+        "    -------------      ----------------      -------------    ",
+        "     ----------------------------------------------------     ",
+        "     ----------------------------------------------------     ",
+        "      -------------------    ----    -------------------      ",
+        "        -----------------    ----    -----------------        ",
+        "          ------------------------------------------          ",
+        "          -------  ----  ----  ----  ----  -------          ",
+        "          -------  ----  ----  ----  ----  -------          ",
+        "            --------------------------------------            ",
+        "              ----------------------------------              ",
+        "                   ------------------------                   "
+    ];
+
+    console.log("\n");
+    redDenseSkull.forEach(line => {
+        // 완벽한 다크 레드로 설정하고 외곽에 강한 붉은 레이저 불빛 효과를 주었습니다.
+        console.log(`%c${line}`, "color: #ff0000; font-family: monospace; font-size: 13px; font-weight: bold; text-shadow: 0 0 8px #ff0000, 0 0 3px #ff3333; line-height: 1.1;");
+    });
+    console.log("\n");
+})();
+(해골 모양)
+
+(function drawUltimateEmojiSkull() {
+    // 1. 메모리에 숨어서 돌고 있던 기존 타이머들을 모조리 찾아내서 지웁니다.
+    for (let i = 1; i < 5000; i++) {
+        window.clearInterval(i);
+    }
+    console.clear();
+
+    // 오직 💀 이모지로만 가득 채운 해골 모양 데이터
+    const baseEmojiSkull = [
+        "                💀💀💀💀💀💀💀💀💀💀💀💀                ",
+        "            💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀            ",
+        "          💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀          ",
+        "        💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀        ",
+        "      💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀      ",
+        "      💀💀💀      💀💀💀💀💀💀💀💀💀💀      💀💀💀      ",
+        "    💀💀💀💀      💀💀💀💀💀💀💀💀💀💀      💀💀💀💀    ",
+        "    💀💀💀💀      💀💀💀💀💀💀💀💀💀💀      💀💀💀💀    ",
+        "    💀💀💀💀💀      💀💀💀💀💀💀💀💀      💀💀💀💀💀    ",
+        "      💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀      ",
+        "      💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀      ",
+        "        💀💀💀💀💀💀💀💀💀    💀💀💀💀💀💀💀💀💀        ",
+        "          💀💀💀💀💀💀💀💀    💀💀💀💀💀💀💀💀          ",
+        "            💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀💀            ",
+        "            💀💀💀  💀💀  💀💀  💀💀  💀💀💀            ",
+        "            💀💀💀  💀💀  💀💀  💀💀  💀💀💀            ",
+        "              💀💀💀💀💀💀💀💀💀💀💀💀💀💀              ",
+        "                💀💀💀💀💀💀💀💀💀💀💀💀                "
+    ];
+
+    // [완벽 수정] 대괄호 내부에 0, 1, 2, 1 박동 숫자를 정확하게 채워 넣었습니다!
+    let pulsePattern = [0, 1, 2, 1];
+    let pulseStep = 0;
+
+    function render() {
+        // 화면 깜빡임과 밀림을 완전히 제거하는 리셋 트릭
+        console.log('\x1B[2J\x1B[3J\x1B[H');
+
+        console.log("%c💀 REAL EMOJI PULSE SKULL 💀", "font-size: 16px; font-weight: bold;");
+        console.log("┌──────────────────────────────────────────────────────────────────┐");
+
+        let scale = pulsePattern[pulseStep % 4];
+
+        baseEmojiSkull.forEach(line => {
+            // 박동 패턴에 맞춰 이모지 크기가 13px -> 14px -> 15px로 커졌다 작아집니다.
+            let size = 13; 
+            if (scale === 1) size = 14;
+            if (scale === 2) size = 15;
+
+            console.log(
+                `%c│${line}│`, 
+                `font-family: monospace; font-size: ${size}px; line-height: 1.1;`
+            );
+        });
+
+        console.log("└──────────────────────────────────────────────────────────────────┘");
+        pulseStep++;
+    }
+
+    // 0.22초(220ms) 주기로 부드럽게 쿵쾅거리는 무한 루프 구동
+    window.nyanLoop = setInterval(render, 220);
+
+    // 언제든 멈출 수 있는 정지 명령어 등록
+    window.stopSkull = function() {
+        clearInterval(window.nyanLoop);
+        console.clear();
+        console.log("%c이모지 해골 애니메이션이 종료되었습니다.", "font-weight: bold;");
+    };
+
+    console.log("%c💡 애니메이션을 정지하려면 콘솔창에 stopSkull() 을 입력하고 엔터를 치세요.", "color: #777777; font-size: 11px;");
+})();
+(해골 모양 애니매이션)
+
+// 1. 화면에 고양이가 그려질 글자 상자를 자바스크립트로 직접 만듭니다.
+const catDiv = document.createElement('div');
+catDiv.style.fontFamily = 'monospace';
+catDiv.style.fontSize = '40px';
+catDiv.style.whiteSpace = 'pre';
+catDiv.style.lineHeight = '1.3';
+catDiv.style.position = 'fixed';
+catDiv.style.top = '30%';
+catDiv.style.left = '40%';
+catDiv.style.padding = '20px';
+catDiv.style.background = '#ffffff';
+catDiv.style.color = '#000000';
+catDiv.style.border = '3px solid #000';
+catDiv.style.zIndex = '99999';
+catDiv.style.borderRadius = '10px';
+document.body.appendChild(catDiv);
+
+// 2. 고양이 모양 문장 기호 배열
+const frames = [
+    "  /\\_/\\  ~\n ( o.o )\n  > ^ < ",
+    "  /\\_/\\  /\n ( =.= )\n  > ^ < ",
+    "  /\\_/\\  \\\n ( o.o )\n  > ^ < ",
+    "  /\\_/\\  |\n ( >.< )\n  > ^ < "
+];
+
+let i = 0;
+
+// 3. 기존 타이머가 있다면 끄고 새로 시작
+if (window.catConsoleTimer) clearInterval(window.catConsoleTimer);
+
+window.catConsoleTimer = setInterval(() => {
+    catDiv.textContent = frames[i];
+    i = (i + 1) % frames.length;
+}, 400);
+
+console.log("고양이 애니메이션이 화면 중앙에 실행되었습니다!");
+(화면 가운데 고양이)
+
+// 1. 전체를 감싸는 메인 상자 생성
+const container = document.createElement('div');
+container.style.position = 'fixed';
+container.style.top = '25%';
+container.style.left = '30%';
+container.style.padding = '35px';
+container.style.background = '#111111'; // 더 깊은 블랙으로 몰입감 상승
+container.style.border = '2px solid #e74c3c'; // 검기가 느껴지는 붉은 테두리
+container.style.zIndex = '99999';
+container.style.borderRadius = '12px';
+container.style.boxShadow = '0 0 30px rgba(231, 76, 60, 0.4)';
+container.style.display = 'flex';
+container.style.flexDirection = 'column';
+container.style.alignItems = 'center';
+container.style.gap = '25px';
+document.body.appendChild(container);
+
+// 2. 애니메이션이 보여질 글자 상자 (텍스트 정렬 및 크기 최적화)
+const swordDiv = document.createElement('div');
+swordDiv.style.fontFamily = 'monospace';
+swordDiv.style.fontSize = '35px';
+swordDiv.style.whiteSpace = 'pre';
+swordDiv.style.lineHeight = '1.5';
+swordDiv.style.color = '#ffffff';
+container.appendChild(swordDiv);
+
+// 3. 사용자 글씨 입력창과 버튼
+const controls = document.createElement('div');
+controls.style.display = 'flex';
+controls.style.gap = '10px';
+
+const input = document.createElement('input');
+input.type = 'text';
+input.placeholder = '대사를 입력하세요';
+input.value = '진.정.한.검.기.'; 
+input.style.padding = '10px 15px';
+input.style.fontSize = '16px';
+input.style.border = '1px solid #e74c3c';
+input.style.borderRadius = '6px';
+input.style.background = '#222';
+input.style.color = '#fff';
+
+const button = document.createElement('button');
+button.textContent = '검기 주입';
+button.style.padding = '10px 20px';
+button.style.fontSize = '16px';
+button.style.cursor = 'pointer';
+button.style.border = 'none';
+button.style.borderRadius = '6px';
+button.style.background = '#e74c3c';
+button.style.color = '#fff';
+button.style.fontWeight = 'bold';
+
+controls.appendChild(input);
+controls.appendChild(button);
+container.appendChild(controls);
+
+// 4. 총 10단계의 디테일 루프 프레임 (칼의 미세한 움직임과 이펙트 묘사)
+const swordFrames = [
+    // 1단계: 대기 상태
+    "   [ 발도 준비... 🧘 ]\n\n    (▒▒▒▒)=============>\n\n  🛡️ %TEXT%", 
+    
+    // 2단계: 달각 (검날이 검집을 살짝 벗어남)
+    "     달각- (기 기동)\n\n    (▒▒▒▒) ═============>\n\n  ⚡ %TEXT%", 
+    
+    // 3단계: 스르릉 (마찰 스파크 발생)
+    "      스르르릉... ☄️\n\n    (▒▒▒▒) ═══===========>\n\n  🔥 %TEXT%", 
+    
+    // 4단계: 슈우욱 (속도감이 붙으며 검신이 드러남)
+    "       슈우우우욱- 💨\n\n    (▒▒▒▒) ═══════========>\n\n  🔥 %TEXT%", 
+    
+    // 5단계: 콰아아 (에너지가 뿜어져 나옴)
+    "        콰아아아앗!! ⚡\n\n    (▒▒▒▒) ═══════════====>\n\n  🔮 %TEXT%", 
+    
+    // 6단계: 파천 (완전히 분리되기 직전 임계점)
+    "         파 아 앗-!! \n\n    (▒▒▒▒) ═══════════════>\n\n  💥 %TEXT%", 
+    
+    // 7단계: 챙! (완전 개방 및 빛 폭발)
+    "      ✨ 💥 콰-창!! 💥 ✨\n\n    (▒▒▒▒)   ═══|═══════════════»\n\n  👑 %TEXT%", 
+    
+    // 8단계: 잔상 유지 (일순간 멈춤 효과 표현)
+    "      ✨ 💥 콰-창!! 💥 ✨\n\n    (▒▒▒▒)   ═══|═══════════════»\n\n  👑 %TEXT%", 
+    
+    // 9단계: 스르륵 (다시 검집으로 회수 시작)
+    "         착검 중...\n\n    (▒▒▒▒) ═══════════════>\n\n  🔄 %TEXT%", 
+    
+    // 10단계: 철컥 (원상 복구 직전)
+    "         철컥-\n\n    (▒▒▒▒) ═══════========>\n\n  🔄 %TEXT%"
+];
+
+let frameIdx = 0;
+let userText = input.value;
+
+button.onclick = () => { userText = input.value; };
+input.onkeydown = (e) => { if (e.key === 'Enter') userText = input.value; };
+
+// 기존 타이머 제거
+if (window.swordDetailTimer) clearInterval(window.swordDetailTimer);
+
+// 프레임 전환 속도를 0.5초(500ms)로 늦춰 묵직한 연출
+window.swordDetailTimer = setInterval(() => {
+    swordDiv.textContent = swordFrames[frameIdx].replace('%TEXT%', userText);
+    frameIdx = (frameIdx + 1) % swordFrames.length;
+}, 500);
+
+console.log("초고디테일 슬로우 발도 애니메이션이 시작되었습니다!");
+(검 꺼내고 다시 넣기)
+
+// 1. 전체 감싸는 메인 상자
+const clockWrapper = document.createElement('div');
+clockWrapper.style.position = 'fixed';
+clockWrapper.style.top = '20%';
+clockWrapper.style.left = '40%';
+clockWrapper.style.display = 'flex';
+clockWrapper.style.flexDirection = 'column';
+clockWrapper.style.alignItems = 'center';
+clockWrapper.style.gap = '20px';
+clockWrapper.style.padding = '30px';
+clockWrapper.style.background = '#1a1a1a';
+clockWrapper.style.borderRadius = '25px';
+clockWrapper.style.boxShadow = '0 15px 35px rgba(0,0,0,0.6)';
+clockWrapper.style.zIndex = '99999';
+document.body.appendChild(clockWrapper);
+
+// 2. 아날로그 시계 원형 판 (숫자가 다 들어가도록 크기를 260px로 키움)
+const clockContainer = document.createElement('div');
+clockContainer.style.width = '260px';
+clockContainer.style.height = '260px';
+clockContainer.style.background = '#222';
+clockContainer.style.border = '6px solid #333';
+clockContainer.style.borderRadius = '50%';
+clockContainer.style.position = 'relative';
+clockContainer.style.boxShadow = 'inset 0 0 20px rgba(0,0,0,0.6)';
+clockWrapper.appendChild(clockContainer);
+
+// ⭐️ 3. 시계 판 내부에 1부터 12까지 숫자 배치하기
+const radius = 105; // 숫자가 배치될 원의 반지름 (중심에서 떨어진 거리)
+const centerX = 130; // 시계 판 중심 X 좌표 (260 / 2)
+const centerY = 130; // 시계 판 중심 Y 좌표 (260 / 2)
+
+for (let num = 1; num <= 12; num++) {
+    const numberDiv = document.createElement('div');
+    numberDiv.textContent = num;
+    numberDiv.style.position = 'absolute';
+    numberDiv.style.fontFamily = 'Arial, sans-serif';
+    numberDiv.style.fontSize = '20px';
+    numberDiv.style.fontWeight = 'bold';
+    numberDiv.style.color = '#ffffff';
+    numberDiv.style.width = '30px';
+    numberDiv.style.height = '30px';
+    numberDiv.style.display = 'flex';
+    numberDiv.style.justifyContent = 'center';
+    numberDiv.style.alignItems = 'center';
+
+    // 30도마다 숫자를 원형으로 배치하는 수학 공식 (12시가 맨 위로 오도록 -90도 회정 보정)
+    const angle = (num * 30 - 90) * (Math.PI / 180); 
+    const x = centerX + radius * Math.cos(angle) - 15; // 15는 글자 상자 자가 크기의 절반 보정
+    const y = centerY + radius * Math.sin(angle) - 15;
+
+    numberDiv.style.left = `${x}px`;
+    numberDiv.style.top = `${y}px`;
+    clockContainer.appendChild(numberDiv);
+}
+
+// 4. 중앙 고정 핀
+const centerDot = document.createElement('div');
+centerDot.style.position = 'absolute';
+centerDot.style.top = '50%';
+centerDot.style.left = '50%';
+centerDot.style.width = '12px';
+centerDot.style.height = '12px';
+centerDot.style.background = '#ff4757';
+centerDot.style.borderRadius = '50%';
+centerDot.style.transform = 'translate(-50%, -50%)';
+centerDot.style.zIndex = '10';
+clockContainer.appendChild(centerDot);
+
+// 바늘 생성 함수
+function createHand(width, height, color) {
+    const hand = document.createElement('div');
+    hand.style.position = 'absolute';
+    hand.style.bottom = '50%';
+    hand.style.left = '50%';
+    hand.style.width = `${width}px`;
+    hand.style.height = `${height}px`;
+    hand.style.background = color;
+    hand.style.borderRadius = '4px';
+    hand.style.transformOrigin = 'bottom center'; 
+    hand.style.transform = 'translateX(-50%) rotate(0deg)';
+    clockContainer.appendChild(hand);
+    return hand;
+}
+
+// 숫자가 생겼으니 바늘 크기도 알맞게 조절
+const hourHand = createHand(6, 65, '#ffffff');
+const minuteHand = createHand(4, 90, '#aaaaaa');
+const secondHand = createHand(2, 105, '#ff4757');
+
+// 5. 하단 디지털 시간창
+const digitalTimeDiv = document.createElement('div');
+digitalTimeDiv.style.fontFamily = 'monospace';
+digitalTimeDiv.style.fontSize = '24px';
+digitalTimeDiv.style.fontWeight = 'bold';
+digitalTimeDiv.style.color = '#2ed573';
+digitalTimeDiv.style.background = '#111';
+digitalTimeDiv.style.padding = '8px 20px';
+digitalTimeDiv.style.borderRadius = '8px';
+digitalTimeDiv.style.border = '1px solid #333';
+clockWrapper.appendChild(digitalTimeDiv);
+
+// 6. 실시간 각도 및 시간 업데이트 함수
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    const secondDeg = (seconds / 60) * 360;
+    const minuteDeg = (minutes / 60) * 360 + (seconds / 60) * 6;
+    const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
+
+    secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+    minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+    hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+    const hDisplay = String(hours).padStart(2, '0');
+    const mDisplay = String(minutes).padStart(2, '0');
+    const sDisplay = String(seconds).padStart(2, '0');
+
+    digitalTimeDiv.textContent = `${hDisplay} : ${mDisplay} : ${sDisplay}`;
+}
+
+// 타이머 리셋 및 시작
+if (window.analogDigitalClockTimer) clearInterval(window.analogDigitalClockTimer);
+window.analogDigitalClockTimer = setInterval(updateClock, 1000);
+updateClock();
+
+console.log("숫자 눈금이 포함된 완성형 아날로그 시계가 실행되었습니다!");
+(아날로그 시계)
+
+// 1. 고양이가 보일 메인 상자를 만듭니다.
+const catWrapper = document.createElement('div');
+catWrapper.style.position = 'fixed';
+catWrapper.style.top = '30%';
+catWrapper.style.left = '40%';
+catWrapper.style.padding = '30px';
+catWrapper.style.background = '#222222'; // 어두운 테마
+catWrapper.style.border = '3px solid #ffb8b8'; // 귀여운 핑크색 테두리
+catWrapper.style.zIndex = '99999';
+catWrapper.style.borderRadius = '15px';
+catWrapper.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+catWrapper.style.display = 'flex';
+catWrapper.style.flexDirection = 'column';
+catWrapper.style.alignItems = 'center';
+catWrapper.style.gap = '15px';
+document.body.appendChild(catWrapper);
+
+// 2. 애니메이션이 그려질 글자 상자
+const catDiv = document.createElement('div');
+catDiv.style.fontFamily = 'monospace';
+catDiv.style.fontSize = '32px';
+catDiv.style.whiteSpace = 'pre';
+catDiv.style.lineHeight = '1.3';
+catDiv.style.color = '#ffffff';
+catWrapper.appendChild(catDiv);
+
+// 3. 사용자가 누른 키를 보여줄 안내창
+const keyDisplay = document.createElement('div');
+keyDisplay.style.fontFamily = 'sans-serif';
+keyDisplay.style.fontSize = '18px';
+keyDisplay.style.color = '#ffb8b8';
+keyDisplay.style.fontWeight = 'bold';
+keyDisplay.textContent = "⌨️ 키보드를 아무거나 눌러보세요!";
+catWrapper.appendChild(keyDisplay);
+
+// 4. 고양이 모션 프레임 (0: 대기, 1: 왼손 탁!, 2: 오른손 탁!)
+const catPoses = {
+    ready: 
+`  /\\_/\\ 
+ ( o.o )
+ 🐾   🐾 
+[=======]`,
+
+    leftHit: 
+`  /\\_/\\ 
+ ( >.< ) ✨
+ 💥   🐾 
+[=======]`,
+
+    rightHit: 
+`  /\\_/\\ 
+ ( >.< )     ✨
+ 🐾   💥 
+[=======]`
+};
+
+// 처음에 대기 상태 고양이 띄우기
+catDiv.textContent = catPoses.ready;
+
+let lastHand = 'right'; // 양손을 번갈아 쓰기 위한 변수
+let resetTimer = null;
+
+// 5. ⭐️ 키보드 입력(KeyDown) 이벤트 연결
+window.onkeydown = function(event) {
+    // 사용자가 누른 키 텍스트 업데이트 (예: "Pressed: A")
+    keyDisplay.textContent = `입력된 키: [ ${event.key.toUpperCase()} ]`;
+    
+    // 이전에 켜두었던 대기 상태 복구 타이머가 있다면 취소
+    clearTimeout(resetTimer);
+    
+    // 왼손, 오른손 번갈아가며 키보드를 치는 효과
+    if (lastHand === 'right') {
+        catDiv.textContent = catPoses.leftHit;
+        lastHand = 'left';
+    } else {
+        catDiv.textContent = catPoses.rightHit;
+        lastHand = 'right';
+    }
+    
+    // 키보드에서 손을 떼고 0.15초(150ms) 뒤에 다시 대기 상태로 복구
+    resetTimer = setTimeout(() => {
+        catDiv.textContent = catPoses.ready;
+    }, 150);
+};
+
+console.log("키보드 치는 고양이가 소환되었습니다! 메모장이나 주소창 대신 웹 화면을 클릭한 뒤 키보드를 눌러보세요.");
+(고양이가 내가 치는 키보드를 따라침)
+
+// [보안 우회] 구글의 보안 정책을 피해 화면에 띄우는 차단 방지 코드입니다.
+const catWrapper = document.createElement('div');
+// 구글의 기존 요소들보다 무조건 맨 위에 오도록 레이어 순위(zIndex)를 극대화했습니다.
+catWrapper.setAttribute('style', `
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    padding: 20px 25px !important;
+    background: #1e1e1e !important;
+    border: 3px solid #ffb8b8 !important;
+    z-index: 2147483647 !important; 
+    border-radius: 15px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+`);
+document.body.appendChild(catWrapper);
+
+// 고양이 텍스트 영역 생성
+const catDiv = document.createElement('div');
+catDiv.setAttribute('style', `
+    font-family: monospace !important;
+    font-size: 26px !important;
+    white-space: pre !important;
+    line-height: 1.3 !important;
+    color: #ffffff !important;
+`);
+catWrapper.appendChild(catDiv);
+
+// ⭐️ 추가됨: 현재 누른 키의 이름을 알려주는 텍스트 창
+const keyDisplay = document.createElement('div');
+keyDisplay.setAttribute('style', `
+    font-family: sans-serif !important;
+    font-size: 15px !important;
+    color: #ffb8b8 !important;
+    font-weight: bold !important;
+`);
+keyDisplay.textContent = "⌨️ 누른 키: [ 대기 중 ]";
+catWrapper.appendChild(keyDisplay);
+
+// KPS 속도 표시 영역
+const kpsDisplay = document.createElement('div');
+kpsDisplay.setAttribute('style', `
+    font-family: sans-serif !important;
+    font-size: 20px !important;
+    color: #51cf66 !important;
+    font-weight: bold !important;
+`);
+kpsDisplay.textContent = "0.0 KPS";
+catWrapper.appendChild(kpsDisplay);
+
+const catPoses = {
+    ready: `  /\\_/\\ \n ( o.o )\n 🐾   🐾 \n[=======]`,
+    leftHit: `  /\\_/\\ \n ( >.< ) ✨\n 💥   🐾 \n[=======]`,
+    rightHit: `  /\\_/\\ \n ( >.< )     ✨\n 🐾   💥 \n[=======]`
+};
+
+catDiv.textContent = catPoses.ready;
+
+let lastHand = 'right';
+let resetTimer = null;
+let keyTimestamps = [];
+
+function updateKPS() {
+    const now = Date.now();
+    keyTimestamps = keyTimestamps.filter(time => now - time < 1000);
+    kpsDisplay.textContent = `${keyTimestamps.length.toFixed(1)} KPS`;
+}
+
+if (window.kpsInterval) clearInterval(window.kpsInterval);
+window.kpsInterval = setInterval(updateKPS, 100);
+
+// 구글 전용 이벤트 바인딩 (이벤트 가로채기 방지)
+window.addEventListener('keydown', function(event) {
+    keyTimestamps.push(Date.now());
+    updateKPS();
+    
+    // ⭐️ event.key 값을 사용해 사용자가 누른 키 이름을 실시간으로 갱신합니다.
+    let keyName = event.key;
+    if (keyName === " ") keyName = "Space"; // 띄어쓰기는 공백 대신 'Space'로 표기
+    keyDisplay.textContent = `⌨️ 누른 키: [ ${keyName.toUpperCase()} ]`;
+    
+    clearTimeout(resetTimer);
+    
+    if (lastHand === 'right') {
+        catDiv.textContent = catPoses.leftHit;
+        lastHand = 'left';
+    } else {
+        catDiv.textContent = catPoses.rightHit;
+        lastHand = 'right';
+    }
+    
+    resetTimer = setTimeout(() => {
+        catDiv.textContent = catPoses.ready;
+        keyDisplay.textContent = "⌨️ 누른 키: [ 대기 중 ]"; // 손을 떼면 대기 상태로 변경
+    }, 120);
+}, true); // true 옵션으로 구글의 입력 가로채기 시스템보다 먼저 반응하도록 설정
+
+console.log("구글 보안 우회형 KPS + 키 확인 고양이가 장착되었습니다!");
+(고양이가 kps 그리고 뭐 눌렀는지 알려줌)
+
+// 108키 풀배열 고양이 가상 키보드 통합 오버레이 코드입니다.
+const container = document.createElement('div');
+container.setAttribute('style', `
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    font-family: sans-serif !important;
+    user-select: none !important;
+`);
+document.body.appendChild(container);
+
+// 1. 고양이 위젯 영역
+const catWrapper = document.createElement('div');
+catWrapper.setAttribute('style', `
+    position: relative !important;
+    width: 100% !important;
+    height: 110px !important;
+    background: #1e1e1e !important;
+    border: 3px solid #ffb8b8 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 10px !important;
+    overflow: hidden !important;
+`);
+container.appendChild(catWrapper);
+
+const catFace = document.createElement('div');
+catFace.setAttribute('style', `
+    font-family: monospace !important;
+    font-size: 22px !important;
+    white-space: pre !important;
+    color: #ffffff !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+`);
+catFace.textContent = ` /\\_/\\ \n( >.< )`;
+catWrapper.appendChild(catFace);
+
+const leftPaw = document.createElement('div');
+leftPaw.setAttribute('style', `
+    position: absolute !important;
+    bottom: 12px !important;
+    left: 42% !important;
+    width: 28px !important;
+    height: 38px !important;
+    background: #ffffff !important;
+    border: 3px solid #ffb8b8 !important;
+    border-radius: 15px 15px 10px 10px !important;
+    transform: rotate(15deg) translateY(-20px) !important;
+    transition: transform 0.05s ease-in-out !important;
+`);
+catWrapper.appendChild(leftPaw);
+
+const rightPaw = document.createElement('div');
+rightPaw.setAttribute('style', `
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 42% !important;
+    width: 28px !important;
+    height: 38px !important;
+    background: #ffffff !important;
+    border: 3px solid #ffb8b8 !important;
+    border-radius: 15px 15px 10px 10px !important;
+    transform: rotate(-15deg) translateY(-20px) !important;
+    transition: transform 0.05s ease-in-out !important;
+`);
+catWrapper.appendChild(rightPaw);
+
+const infoDiv = document.createElement('div');
+infoDiv.setAttribute('style', `
+    position: absolute !important;
+    top: 8px !important;
+    right: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 3px !important;
+`);
+catWrapper.appendChild(infoDiv);
+
+const keyDisplay = document.createElement('div');
+keyDisplay.setAttribute('style', `
+    font-size: 13px !important;
+    color: #ffb8b8 !important;
+    font-weight: bold !important;
+`);
+keyDisplay.textContent = "누른 키: [ 대기 ]";
+infoDiv.appendChild(keyDisplay);
+
+const kpsDisplay = document.createElement('div');
+kpsDisplay.setAttribute('style', `
+    font-size: 16px !important;
+    color: #51cf66 !important;
+    font-weight: bold !important;
+`);
+kpsDisplay.textContent = "0.0 KPS";
+infoDiv.appendChild(kpsDisplay);
+
+// 2. 108키 풀 가상 키보드 영역
+const kbWrapper = document.createElement('div');
+kbWrapper.setAttribute('style', `
+    padding: 10px !important;
+    background: rgba(30, 30, 30, 0.95) !important;
+    border: 2px solid #555 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+`);
+container.appendChild(kbWrapper);
+
+// 108키 레이아웃 정의 (Standard 108-Key Layout)
+const keyboardRows = [
+    // Function Row + Media Keys
+    [
+        { label: 'Esc', code: 'Escape', side: 'left', w: '26px' }, { gap: '10px' },
+        { label: 'F1', code: 'F1', side: 'left', w: '24px' }, { label: 'F2', code: 'F2', side: 'left', w: '24px' },
+        { label: 'F3', code: 'F3', side: 'left', w: '24px' }, { label: 'F4', code: 'F4', side: 'left', w: '24px' }, { gap: '8px' },
+        { label: 'F5', code: 'F5', side: 'left', w: '24px' }, { label: 'F6', code: 'F6', side: 'left', w: '24px' },
+        { label: 'F7', code: 'F7', side: 'right', w: '24px' }, { label: 'F8', code: 'F8', side: 'right', w: '24px' }, { gap: '8px' },
+        { label: 'F9', code: 'F9', side: 'right', w: '24px' }, { label: 'F10', code: 'F10', side: 'right', w: '24px' },
+        { label: 'F11', code: 'F11', side: 'right', w: '24px' }, { label: 'F12', code: 'F12', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: 'Prt', code: 'PrintScreen', side: 'right', w: '24px' }, { label: 'Scr', code: 'ScrollLock', side: 'right', w: '24px' },
+        { label: 'Pse', code: 'Pause', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: 'M1', code: 'MediaTrackPrevious', side: 'right', w: '24px' }, { label: 'M2', code: 'MediaPlayPause', side: 'right', w: '24px' },
+        { label: 'M3', code: 'MediaTrackNext', side: 'right', w: '24px' }, { label: 'M4', code: 'AudioVolumeMute', side: 'right', w: '24px' }
+    ],
+    // Number Row + Navigation + Numpad Top
+    [
+        { label: '`', code: 'Backquote', side: 'left' }, { label: '1', code: 'Digit1', side: 'left' },
+        { label: '2', code: 'Digit2', side: 'left' }, { label: '3', code: 'Digit3', side: 'left' },
+        { label: '4', code: 'Digit4', side: 'left' }, { label: '5', code: 'Digit5', side: 'left' },
+        { label: '6', code: 'Digit6', side: 'right' }, { label: '7', code: 'Digit7', side: 'right' },
+        { label: '8', code: 'Digit8', side: 'right' }, { label: '9', code: 'Digit9', side: 'right' },
+        { label: '0', code: 'Digit0', side: 'right' }, { label: '-', code: 'Minus', side: 'right' },
+        { label: '=', code: 'Equal', side: 'right' }, { label: '←', code: 'Backspace', side: 'right', w: '42px' }, { gap: '10px' },
+        { label: 'Ins', code: 'Insert', side: 'right', w: '24px' }, { label: 'Hm', code: 'Home', side: 'right', w: '24px' },
+        { label: 'PU', code: 'PageUp', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: 'Num', code: 'NumLock', side: 'right', w: '24px' }, { label: '/', code: 'NumpadDivide', side: 'right', w: '24px' },
+        { label: '*', code: 'NumpadMultiply', side: 'right', w: '24px' }, { label: '-', code: 'NumpadSubtract', side: 'right', w: '24px' }
+    ],
+    // QWERTY Row
+    [
+        { label: 'Tab', code: 'Tab', side: 'left', w: '36px' }, { label: 'Q', code: 'KeyQ', side: 'left' },
+        { label: 'W', code: 'KeyW', side: 'left' }, { label: 'E', code: 'KeyE', side: 'left' },
+        { label: 'R', code: 'KeyR', side: 'left' }, { label: 'T', code: 'KeyT', side: 'left' },
+        { label: 'Y', code: 'KeyY', side: 'right' }, { label: 'U', code: 'KeyU', side: 'right' },
+        { label: 'I', code: 'KeyI', side: 'right' }, { label: 'O', code: 'KeyO', side: 'right' },
+        { label: 'P', code: 'KeyP', side: 'right' }, { label: '[', code: 'BracketLeft', side: 'right' },
+        { label: ']', code: 'BracketRight', side: 'right' }, { label: '\\', code: 'Backslash', side: 'right', w: '30px' }, { gap: '10px' },
+        { label: 'Del', code: 'Delete', side: 'right', w: '24px' }, { label: 'End', code: 'End', side: 'right', w: '24px' },
+        { label: 'PD', code: 'PageDown', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: '7', code: 'Numpad7', side: 'right', w: '24px' }, { label: '8', code: 'Numpad8', side: 'right', w: '24px' },
+        { label: '9', code: 'Numpad9', side: 'right', w: '24px' }, { label: '+', code: 'NumpadAdd', side: 'right', w: '24px' }
+    ],
+    // ASDF Row
+    [
+        { label: 'Caps', code: 'CapsLock', side: 'left', w: '42px' }, { label: 'A', code: 'KeyA', side: 'left' },
+        { label: 'S', code: 'KeyS', side: 'left' }, { label: 'D', code: 'KeyD', side: 'left' },
+        { label: 'F', code: 'KeyF', side: 'left' }, { label: 'G', code: 'KeyG', side: 'left' },
+        { label: 'H', code: 'KeyH', side: 'right' }, { label: 'J', code: 'KeyJ', side: 'right' },
+        { label: 'K', code: 'KeyK', side: 'right' }, { label: 'L', code: 'KeyL', side: 'right' },
+        { label: ';', code: 'Semicolon', side: 'right' }, { label: "'", code: 'Quote', side: 'right' },
+        { label: 'Enter', code: 'Enter', side: 'right', w: '48px' }, { gap: '112px' },
+        { label: '4', code: 'Numpad4', side: 'right', w: '24px' }, { label: '5', code: 'Numpad5', side: 'right', w: '24px' },
+        { label: '6', code: 'Numpad6', side: 'right', w: '24px' }, { label: 'Etr', code: 'NumpadEnter', side: 'right', w: '24px' }
+    ],
+    // ZXCV Row
+    [
+        { label: 'Shift', code: 'ShiftLeft', side: 'left', w: '54px' }, { label: 'Z', code: 'KeyZ', side: 'left' },
+        { label: 'X', code: 'KeyX', side: 'left' }, { label: 'C', code: 'KeyC', side: 'left' },
+        { label: 'V', code: 'KeyV', side: 'left' }, { label: 'B', code: 'KeyB', side: 'left' },
+        { label: 'N', code: 'KeyN', side: 'right' }, { label: 'M', code: 'KeyM', side: 'right' },
+        { label: ',', code: 'Comma', side: 'right' }, { label: '.', code: 'Period', side: 'right' },
+        { label: '/', code: 'Slash', side: 'right' }, { label: 'Shift', code: 'ShiftRight', side: 'right', w: '58px' }, { gap: '42px' },
+        { label: '▲', code: 'ArrowUp', side: 'right', w: '24px' }, { gap: '42px' },
+        { label: '1', code: 'Numpad1', side: 'right', w: '24px' }, { label: '2', code: 'Numpad2', side: 'right', w: '24px' },
+        { label: '3', code: 'Numpad3', side: 'right', w: '24px' }
+    ],
+    // Bottom Row
+    [
+        { label: 'Ctrl', code: 'ControlLeft', side: 'left', w: '30px' }, { label: 'Win', code: 'MetaLeft', side: 'left', w: '26px' },
+        { label: 'Alt', code: 'AltLeft', side: 'left', w: '28px' }, { label: 'Space', code: 'Space', side: 'both', w: '160px' },
+        { label: 'Alt', code: 'AltRight', side: 'right', w: '28px' }, { label: 'Win', code: 'MetaRight', side: 'right', w: '26px' },
+        { label: 'Fn', code: 'Fn', side: 'right', w: '24px' }, { label: 'Ctrl', code: 'ControlRight', side: 'right', w: '30px' }, { gap: '10px' },
+        { label: '◀', code: 'ArrowLeft', side: 'right', w: '24px' }, { label: '▼', code: 'ArrowDown', side: 'right', w: '24px' },
+        { label: '▶', code: 'ArrowRight', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: '0', code: 'Numpad0', side: 'right', w: '52px' }, { label: '.', code: 'NumpadDecimal', side: 'right', w: '24px' }
+    ]
+];
+
+const keyElementsMap = {};
+
+keyboardRows.forEach(rowKeys => {
+    const rowDiv = document.createElement('div');
+    rowDiv.setAttribute('style', `display: flex !important; gap: 3px !important; justify-content: flex-start !important; align-items: center !important;`);
+   
+    rowKeys.forEach(keyInfo => {
+        if (keyInfo.gap) {
+            const gapEl = document.createElement('div');
+            gapEl.style.width = keyInfo.gap;
+            rowDiv.appendChild(gapEl);
+            return;
+        }
+
+        const keyEl = document.createElement('div');
+        const width = keyInfo.w || '22px';
+
+        keyEl.setAttribute('style', `
+            width: ${width} !important;
+            height: 24px !important;
+            background: #2d2d2d !important;
+            border: 1px solid #444 !important;
+            border-bottom: 2px solid #222 !important;
+            border-radius: 3px !important;
+            color: #fff !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 9px !important;
+            font-weight: bold !important;
+            transition: background 0.05s, transform 0.05s, border-bottom-width 0.05s !important;
+            box-sizing: border-box !important;
+        `);
+        keyEl.textContent = keyInfo.label;
+        rowDiv.appendChild(keyEl);
+       
+        keyElementsMap[keyInfo.code] = { el: keyEl, side: keyInfo.side };
+    });
+    kbWrapper.appendChild(rowDiv);
+});
+
+let leftResetTimer = null;
+let rightResetTimer = null;
+let keyTimestamps = [];
+
+function updateKPS() {
+    const now = Date.now();
+    keyTimestamps = keyTimestamps.filter(time => now - time < 1000);
+    kpsDisplay.textContent = `${keyTimestamps.length.toFixed(1)} KPS`;
+}
+
+if (window.kpsInterval) clearInterval(window.kpsInterval);
+window.kpsInterval = setInterval(updateKPS, 100);
+
+// 키 press 및 고양이 반응
+window.addEventListener('keydown', function(event) {
+    if (event.repeat) return; // 오토 리피트 방지
+   
+    keyTimestamps.push(Date.now());
+    updateKPS();
+   
+    let keyName = event.key;
+    if (keyName === " ") keyName = "Space";
+    keyDisplay.textContent = `누른 키: [ ${keyName.toUpperCase()} ]`;
+   
+    const code = event.code;
+    const keyData = keyElementsMap[code];
+   
+    if (keyData) {
+        keyData.el.style.background = '#51cf66';
+        keyData.el.style.color = '#1e1e1e';
+        keyData.el.style.transform = 'translateY(1px)';
+        keyData.el.style.borderBottomWidth = '1px';
+
+        if (keyData.side === 'left') {
+            clearTimeout(leftResetTimer);
+            leftPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            leftResetTimer = setTimeout(() => {
+                leftPaw.style.transform = 'rotate(15deg) translateY(-20px)';
+            }, 120);
+        } else if (keyData.side === 'right') {
+            clearTimeout(rightResetTimer);
+            rightPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            rightResetTimer = setTimeout(() => {
+                rightPaw.style.transform = 'rotate(-15deg) translateY(-20px)';
+            }, 120);
+        } else if (keyData.side === 'both') {
+            clearTimeout(leftResetTimer);
+            clearTimeout(rightResetTimer);
+            leftPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            rightPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            leftResetTimer = setTimeout(() => {
+                leftPaw.style.transform = 'rotate(15deg) translateY(-20px)';
+                rightPaw.style.transform = 'rotate(-15deg) translateY(-20px)';
+            }, 120);
+        }
+    }
+   
+    setTimeout(() => {
+        keyDisplay.textContent = "누른 키: [ 대기 ]";
+    }, 120);
+}, true);
+
+window.addEventListener('keyup', function(event) {
+    const code = event.code;
+    const keyData = keyElementsMap[code];
+    if (keyData) {
+        keyData.el.style.background = '#2d2d2d';
+        keyData.el.style.color = '#fff';
+        keyData.el.style.transform = 'translateY(0)';
+        keyData.el.style.borderBottomWidth = '2px';
+    }
+}, true);
+
+console.log("108키 풀배열 가상 키보드가 탑재되었습니다!");
+(108키 고양이)
+
+// 1. 현재 화면 전체를 하얀색으로 가득 채우는 오버레이를 만듭니다
+const overlay = document.createElement('div');
+overlay.style.position = 'fixed';
+overlay.style.top = '0';
+overlay.style.left = '0';
+overlay.style.width = '100vw';
+overlay.style.height = '100vh';
+overlay.style.backgroundColor = '#ffffff';
+overlay.style.zIndex = '999999';
+document.body.appendChild(overlay);
+
+// 2. 삐삐삐 소리를 5번 재생합니다.
+try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+           
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+           
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+           
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }, i * 300);
+    }
+} catch (e) {
+    console.log("오디오 재생 실패:", e);
+}
+
+// 3. 소리가 다 울린 후(약 1초 뒤) 알림창 띄우기
+setTimeout(() => {
+    alert("You are hacked! send one bitcoin to 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy (ransomware)");
+   
+    setTimeout(() => {
+        // 배경을 완전한 검은색으로 전환
+        overlay.style.backgroundColor = '#000000';
+       
+        // [보안 우회] innerHTML을 전혀 쓰지 않고 모든 요소를 DOM 객체로 직접 생성
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.justifyContent = 'center';
+        container.style.alignItems = 'center';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.color = '#ff0000';
+        container.style.fontFamily = 'monospace';
+
+        // ⚠ 경고 아이콘 생성 및 초기 스타일 부여
+        const iconDiv = document.createElement('div');
+        iconDiv.textContent = '⚠';
+        iconDiv.style.fontSize = '20vw';
+        iconDiv.style.lineHeight = '1';
+        iconDiv.style.color = '#ff0000';
+        iconDiv.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out, text-shadow 0.5s ease-in-out';
+        iconDiv.style.textShadow = '0 0 20px #ff0000';
+        iconDiv.style.userSelect = 'none';
+
+        // SYSTEM COMPROMISED 텍스트 생성 및 스타일 부여
+        const textDiv = document.createElement('div');
+        textDiv.textContent = 'SYSTEM COMPROMISED';
+        textDiv.style.fontSize = '2.5vw';
+        textDiv.style.marginTop = '30px';
+        textDiv.style.fontWeight = 'bold';
+        textDiv.style.letterSpacing = '2px';
+        textDiv.style.textShadow = '0 0 10px #ff0000';
+
+        // 구조 조립 후 화면에 부착
+        container.appendChild(iconDiv);
+        container.appendChild(textDiv);
+        overlay.appendChild(container);
+
+        // [CSS 무력화 우회] CSS 앳키프레임(@keyframes) 대신 자바스크립트 타이머로 애니메이션 직접 구현
+        let isPulse = false;
+        setInterval(() => {
+            if (!isPulse) {
+                iconDiv.style.transform = 'scale(1.1)';
+                iconDiv.style.opacity = '0.4';
+                iconDiv.style.textShadow = '0 0 40px #ff3333';
+            } else {
+                iconDiv.style.transform = 'scale(1)';
+                iconDiv.style.opacity = '1';
+                iconDiv.style.textShadow = '0 0 20px #ff0000';
+            }
+            isPulse = !isPulse;
+        }, 500); // 0.5초 간격으로 깜빡임 전환
+       
+        // --- 맨 마지막 전체화면 전환 로직 ---
+        const enterFullscreen = () => {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(e => console.log("전체화면 자동 전환 차단됨 (클릭 필요):", e));
+            } else if (elem.webkitRequestFullscreen) { // Safari
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE11
+                elem.msRequestFullscreen();
+            }
+        };
+
+        // 1. 자동으로 전체화면 시도
+        enterFullscreen();
+       
+        // 2. 브라우저가 자동 전환을 막았을 경우를 대비해 화면 클릭 시 전체화면으로 전환되도록 설정
+        overlay.addEventListener('click', enterFullscreen);
+
+    }, 0);
+}, 1000);
+(해킹)
