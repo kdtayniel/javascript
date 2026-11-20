@@ -1,0 +1,1731 @@
+// 108키 풀배열 고양이 가상 키보드 통합 오버레이 코드입니다.
+const container = document.createElement('div');
+container.setAttribute('style', `
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    font-family: sans-serif !important;
+    user-select: none !important;
+`);
+document.body.appendChild(container);
+
+// 1. 고양이 위젯 영역
+const catWrapper = document.createElement('div');
+catWrapper.setAttribute('style', `
+    position: relative !important;
+    width: 100% !important;
+    height: 110px !important;
+    background: #1e1e1e !important;
+    border: 3px solid #ffb8b8 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 10px !important;
+    overflow: hidden !important;
+`);
+container.appendChild(catWrapper);
+
+const catFace = document.createElement('div');
+catFace.setAttribute('style', `
+    font-family: monospace !important;
+    font-size: 22px !important;
+    white-space: pre !important;
+    color: #ffffff !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+`);
+catFace.textContent = ` /\\_/\\ \n( >.< )`;
+catWrapper.appendChild(catFace);
+
+const leftPaw = document.createElement('div');
+leftPaw.setAttribute('style', `
+    position: absolute !important;
+    bottom: 12px !important;
+    left: 42% !important;
+    width: 28px !important;
+    height: 38px !important;
+    background: #ffffff !important;
+    border: 3px solid #ffb8b8 !important;
+    border-radius: 15px 15px 10px 10px !important;
+    transform: rotate(15deg) translateY(-20px) !important;
+    transition: transform 0.05s ease-in-out !important;
+`);
+catWrapper.appendChild(leftPaw);
+
+const rightPaw = document.createElement('div');
+rightPaw.setAttribute('style', `
+    position: absolute !important;
+    bottom: 12px !important;
+    right: 42% !important;
+    width: 28px !important;
+    height: 38px !important;
+    background: #ffffff !important;
+    border: 3px solid #ffb8b8 !important;
+    border-radius: 15px 15px 10px 10px !important;
+    transform: rotate(-15deg) translateY(-20px) !important;
+    transition: transform 0.05s ease-in-out !important;
+`);
+catWrapper.appendChild(rightPaw);
+
+const infoDiv = document.createElement('div');
+infoDiv.setAttribute('style', `
+    position: absolute !important;
+    top: 8px !important;
+    right: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 3px !important;
+`);
+catWrapper.appendChild(infoDiv);
+
+const keyDisplay = document.createElement('div');
+keyDisplay.setAttribute('style', `
+    font-size: 13px !important;
+    color: #ffb8b8 !important;
+    font-weight: bold !important;
+`);
+keyDisplay.textContent = "누른 키: [ 대기 ]";
+infoDiv.appendChild(keyDisplay);
+
+const kpsDisplay = document.createElement('div');
+kpsDisplay.setAttribute('style', `
+    font-size: 16px !important;
+    color: #51cf66 !important;
+    font-weight: bold !important;
+`);
+kpsDisplay.textContent = "0.0 KPS";
+infoDiv.appendChild(kpsDisplay);
+
+// 2. 108키 풀 가상 키보드 영역
+const kbWrapper = document.createElement('div');
+kbWrapper.setAttribute('style', `
+    padding: 10px !important;
+    background: rgba(30, 30, 30, 0.95) !important;
+    border: 2px solid #555 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+`);
+container.appendChild(kbWrapper);
+
+// 108키 레이아웃 정의 (Standard 108-Key Layout)
+const keyboardRows = [
+    // Function Row + Media Keys
+    [
+        { label: 'Esc', code: 'Escape', side: 'left', w: '26px' }, { gap: '10px' },
+        { label: 'F1', code: 'F1', side: 'left', w: '24px' }, { label: 'F2', code: 'F2', side: 'left', w: '24px' },
+        { label: 'F3', code: 'F3', side: 'left', w: '24px' }, { label: 'F4', code: 'F4', side: 'left', w: '24px' }, { gap: '8px' },
+        { label: 'F5', code: 'F5', side: 'left', w: '24px' }, { label: 'F6', code: 'F6', side: 'left', w: '24px' },
+        { label: 'F7', code: 'F7', side: 'right', w: '24px' }, { label: 'F8', code: 'F8', side: 'right', w: '24px' }, { gap: '8px' },
+        { label: 'F9', code: 'F9', side: 'right', w: '24px' }, { label: 'F10', code: 'F10', side: 'right', w: '24px' },
+        { label: 'F11', code: 'F11', side: 'right', w: '24px' }, { label: 'F12', code: 'F12', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: 'Prt', code: 'PrintScreen', side: 'right', w: '24px' }, { label: 'Scr', code: 'ScrollLock', side: 'right', w: '24px' },
+        { label: 'Pse', code: 'Pause', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: 'M1', code: 'MediaTrackPrevious', side: 'right', w: '24px' }, { label: 'M2', code: 'MediaPlayPause', side: 'right', w: '24px' },
+        { label: 'M3', code: 'MediaTrackNext', side: 'right', w: '24px' }, { label: 'M4', code: 'AudioVolumeMute', side: 'right', w: '24px' }
+    ],
+    // Number Row + Navigation + Numpad Top
+    [
+        { label: '`', code: 'Backquote', side: 'left' }, { label: '1', code: 'Digit1', side: 'left' },
+        { label: '2', code: 'Digit2', side: 'left' }, { label: '3', code: 'Digit3', side: 'left' },
+        { label: '4', code: 'Digit4', side: 'left' }, { label: '5', code: 'Digit5', side: 'left' },
+        { label: '6', code: 'Digit6', side: 'right' }, { label: '7', code: 'Digit7', side: 'right' },
+        { label: '8', code: 'Digit8', side: 'right' }, { label: '9', code: 'Digit9', side: 'right' },
+        { label: '0', code: 'Digit0', side: 'right' }, { label: '-', code: 'Minus', side: 'right' },
+        { label: '=', code: 'Equal', side: 'right' }, { label: '←', code: 'Backspace', side: 'right', w: '42px' }, { gap: '10px' },
+        { label: 'Ins', code: 'Insert', side: 'right', w: '24px' }, { label: 'Hm', code: 'Home', side: 'right', w: '24px' },
+        { label: 'PU', code: 'PageUp', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: 'Num', code: 'NumLock', side: 'right', w: '24px' }, { label: '/', code: 'NumpadDivide', side: 'right', w: '24px' },
+        { label: '*', code: 'NumpadMultiply', side: 'right', w: '24px' }, { label: '-', code: 'NumpadSubtract', side: 'right', w: '24px' }
+    ],
+    // QWERTY Row
+    [
+        { label: 'Tab', code: 'Tab', side: 'left', w: '36px' }, { label: 'Q', code: 'KeyQ', side: 'left' },
+        { label: 'W', code: 'KeyW', side: 'left' }, { label: 'E', code: 'KeyE', side: 'left' },
+        { label: 'R', code: 'KeyR', side: 'left' }, { label: 'T', code: 'KeyT', side: 'left' },
+        { label: 'Y', code: 'KeyY', side: 'right' }, { label: 'U', code: 'KeyU', side: 'right' },
+        { label: 'I', code: 'KeyI', side: 'right' }, { label: 'O', code: 'KeyO', side: 'right' },
+        { label: 'P', code: 'KeyP', side: 'right' }, { label: '[', code: 'BracketLeft', side: 'right' },
+        { label: ']', code: 'BracketRight', side: 'right' }, { label: '\\', code: 'Backslash', side: 'right', w: '30px' }, { gap: '10px' },
+        { label: 'Del', code: 'Delete', side: 'right', w: '24px' }, { label: 'End', code: 'End', side: 'right', w: '24px' },
+        { label: 'PD', code: 'PageDown', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: '7', code: 'Numpad7', side: 'right', w: '24px' }, { label: '8', code: 'Numpad8', side: 'right', w: '24px' },
+        { label: '9', code: 'Numpad9', side: 'right', w: '24px' }, { label: '+', code: 'NumpadAdd', side: 'right', w: '24px' }
+    ],
+    // ASDF Row
+    [
+        { label: 'Caps', code: 'CapsLock', side: 'left', w: '42px' }, { label: 'A', code: 'KeyA', side: 'left' },
+        { label: 'S', code: 'KeyS', side: 'left' }, { label: 'D', code: 'KeyD', side: 'left' },
+        { label: 'F', code: 'KeyF', side: 'left' }, { label: 'G', code: 'KeyG', side: 'left' },
+        { label: 'H', code: 'KeyH', side: 'right' }, { label: 'J', code: 'KeyJ', side: 'right' },
+        { label: 'K', code: 'KeyK', side: 'right' }, { label: 'L', code: 'KeyL', side: 'right' },
+        { label: ';', code: 'Semicolon', side: 'right' }, { label: "'", code: 'Quote', side: 'right' },
+        { label: 'Enter', code: 'Enter', side: 'right', w: '48px' }, { gap: '112px' },
+        { label: '4', code: 'Numpad4', side: 'right', w: '24px' }, { label: '5', code: 'Numpad5', side: 'right', w: '24px' },
+        { label: '6', code: 'Numpad6', side: 'right', w: '24px' }, { label: 'Etr', code: 'NumpadEnter', side: 'right', w: '24px' }
+    ],
+    // ZXCV Row
+    [
+        { label: 'Shift', code: 'ShiftLeft', side: 'left', w: '54px' }, { label: 'Z', code: 'KeyZ', side: 'left' },
+        { label: 'X', code: 'KeyX', side: 'left' }, { label: 'C', code: 'KeyC', side: 'left' },
+        { label: 'V', code: 'KeyV', side: 'left' }, { label: 'B', code: 'KeyB', side: 'left' },
+        { label: 'N', code: 'KeyN', side: 'right' }, { label: 'M', code: 'KeyM', side: 'right' },
+        { label: ',', code: 'Comma', side: 'right' }, { label: '.', code: 'Period', side: 'right' },
+        { label: '/', code: 'Slash', side: 'right' }, { label: 'Shift', code: 'ShiftRight', side: 'right', w: '58px' }, { gap: '42px' },
+        { label: '▲', code: 'ArrowUp', side: 'right', w: '24px' }, { gap: '42px' },
+        { label: '1', code: 'Numpad1', side: 'right', w: '24px' }, { label: '2', code: 'Numpad2', side: 'right', w: '24px' },
+        { label: '3', code: 'Numpad3', side: 'right', w: '24px' }
+    ],
+    // Bottom Row
+    [
+        { label: 'Ctrl', code: 'ControlLeft', side: 'left', w: '30px' }, { label: 'Win', code: 'MetaLeft', side: 'left', w: '26px' },
+        { label: 'Alt', code: 'AltLeft', side: 'left', w: '28px' }, { label: 'Space', code: 'Space', side: 'both', w: '160px' },
+        { label: 'Alt', code: 'AltRight', side: 'right', w: '28px' }, { label: 'Win', code: 'MetaRight', side: 'right', w: '26px' },
+        { label: 'Fn', code: 'Fn', side: 'right', w: '24px' }, { label: 'Ctrl', code: 'ControlRight', side: 'right', w: '30px' }, { gap: '10px' },
+        { label: '◀', code: 'ArrowLeft', side: 'right', w: '24px' }, { label: '▼', code: 'ArrowDown', side: 'right', w: '24px' },
+        { label: '▶', code: 'ArrowRight', side: 'right', w: '24px' }, { gap: '10px' },
+        { label: '0', code: 'Numpad0', side: 'right', w: '52px' }, { label: '.', code: 'NumpadDecimal', side: 'right', w: '24px' }
+    ]
+];
+
+const keyElementsMap = {};
+
+keyboardRows.forEach(rowKeys => {
+    const rowDiv = document.createElement('div');
+    rowDiv.setAttribute('style', `display: flex !important; gap: 3px !important; justify-content: flex-start !important; align-items: center !important;`);
+   
+    rowKeys.forEach(keyInfo => {
+        if (keyInfo.gap) {
+            const gapEl = document.createElement('div');
+            gapEl.style.width = keyInfo.gap;
+            rowDiv.appendChild(gapEl);
+            return;
+        }
+
+        const keyEl = document.createElement('div');
+        const width = keyInfo.w || '22px';
+
+        keyEl.setAttribute('style', `
+            width: ${width} !important;
+            height: 24px !important;
+            background: #2d2d2d !important;
+            border: 1px solid #444 !important;
+            border-bottom: 2px solid #222 !important;
+            border-radius: 3px !important;
+            color: #fff !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 9px !important;
+            font-weight: bold !important;
+            transition: background 0.05s, transform 0.05s, border-bottom-width 0.05s !important;
+            box-sizing: border-box !important;
+        `);
+        keyEl.textContent = keyInfo.label;
+        rowDiv.appendChild(keyEl);
+       
+        keyElementsMap[keyInfo.code] = { el: keyEl, side: keyInfo.side };
+    });
+    kbWrapper.appendChild(rowDiv);
+});
+
+let leftResetTimer = null;
+let rightResetTimer = null;
+let keyTimestamps = [];
+
+function updateKPS() {
+    const now = Date.now();
+    keyTimestamps = keyTimestamps.filter(time => now - time < 1000);
+    kpsDisplay.textContent = `${keyTimestamps.length.toFixed(1)} KPS`;
+}
+
+if (window.kpsInterval) clearInterval(window.kpsInterval);
+window.kpsInterval = setInterval(updateKPS, 100);
+
+// 키 press 및 고양이 반응
+window.addEventListener('keydown', function(event) {
+    if (event.repeat) return; // 오토 리피트 방지
+   
+    keyTimestamps.push(Date.now());
+    updateKPS();
+   
+    let keyName = event.key;
+    if (keyName === " ") keyName = "Space";
+    keyDisplay.textContent = `누른 키: [ ${keyName.toUpperCase()} ]`;
+   
+    const code = event.code;
+    const keyData = keyElementsMap[code];
+   
+    if (keyData) {
+        keyData.el.style.background = '#51cf66';
+        keyData.el.style.color = '#1e1e1e';
+        keyData.el.style.transform = 'translateY(1px)';
+        keyData.el.style.borderBottomWidth = '1px';
+
+        if (keyData.side === 'left') {
+            clearTimeout(leftResetTimer);
+            leftPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            leftResetTimer = setTimeout(() => {
+                leftPaw.style.transform = 'rotate(15deg) translateY(-20px)';
+            }, 120);
+        } else if (keyData.side === 'right') {
+            clearTimeout(rightResetTimer);
+            rightPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            rightResetTimer = setTimeout(() => {
+                rightPaw.style.transform = 'rotate(-15deg) translateY(-20px)';
+            }, 120);
+        } else if (keyData.side === 'both') {
+            clearTimeout(leftResetTimer);
+            clearTimeout(rightResetTimer);
+            leftPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            rightPaw.style.transform = 'rotate(0deg) translateY(0px)';
+            leftResetTimer = setTimeout(() => {
+                leftPaw.style.transform = 'rotate(15deg) translateY(-20px)';
+                rightPaw.style.transform = 'rotate(-15deg) translateY(-20px)';
+            }, 120);
+        }
+    }
+   
+    setTimeout(() => {
+        keyDisplay.textContent = "누른 키: [ 대기 ]";
+    }, 120);
+}, true);
+
+window.addEventListener('keyup', function(event) {
+    const code = event.code;
+    const keyData = keyElementsMap[code];
+    if (keyData) {
+        keyData.el.style.background = '#2d2d2d';
+        keyData.el.style.color = '#fff';
+        keyData.el.style.transform = 'translateY(0)';
+        keyData.el.style.borderBottomWidth = '2px';
+    }
+}, true);
+
+console.log("108키 풀배열 가상 키보드가 탑재되었습니다!");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function() {
+    if (window.catKeyboardContainer) {
+        window.catKeyboardContainer.remove();
+    }
+
+    const container = document.createElement('div');
+    window.catKeyboardContainer = container;
+    container.setAttribute('style', 'position:fixed!important;bottom:20px!important;left:20px!important;z-index:2147483647!important;display:flex!important;flex-direction:column!important;gap:8px!important;font-family:sans-serif!important;user-select:none!important;pointer-events:none!important;');
+    document.body.appendChild(container);
+
+    const catWrapper = document.createElement('div');
+    catWrapper.setAttribute('style', 'position:relative!important;width:100%!important;height:110px!important;background:#1e1e1e!important;border:3px solid #ffb8b8!important;border-radius:15px!important;box-shadow:0 8px 25px rgba(0,0,0,0.5)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding-top:10px!important;overflow:hidden!important;');
+    container.appendChild(catWrapper);
+
+    const catFace = document.createElement('div');
+    catFace.setAttribute('style', 'font-family:monospace!important;font-size:22px!important;white-space:pre!important;color:#ffffff!important;line-height:1.1!important;text-align:center!important;');
+    catFace.textContent = " /\\_/\\ \n( >.< )";
+    catWrapper.appendChild(catFace);
+
+    const leftPaw = document.createElement('div');
+    leftPaw.setAttribute('style', 'position:absolute!important;bottom:12px!important;left:40%!important;width:28px!important;height:38px!important;background:#ffffff!important;border:3px solid #ffb8b8!important;border-radius:15px 15px 10px 10px!important;transform:rotate(15deg) translateY(0px)!important;transition:transform 0.05s ease-in-out!important;');
+    catWrapper.appendChild(leftPaw);
+
+    const rightPaw = document.createElement('div');
+    rightPaw.setAttribute('style', 'position:absolute!important;bottom:12px!important;right:40%!important;width:28px!important;height:38px!important;background:#ffffff!important;border:3px solid #ffb8b8!important;border-radius:15px 15px 10px 10px!important;transform:rotate(-15deg) translateY(0px)!important;transition:transform 0.05s ease-in-out!important;');
+    catWrapper.appendChild(rightPaw);
+
+    const infoDiv = document.createElement('div');
+    infoDiv.setAttribute('style', 'position:absolute!important;top:8px!important;right:15px!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:3px!important;');
+    catWrapper.appendChild(infoDiv);
+
+    const keyDisplay = document.createElement('div');
+    keyDisplay.setAttribute('style', 'font-size:13px!important;color:#ffb8b8!important;font-weight:bold!important;');
+    keyDisplay.textContent = "\ub204\ub9b8 \ud0a4: [ \ub300\uae30 ]";
+    infoDiv.appendChild(keyDisplay);
+
+    const kpsDisplay = document.createElement('div');
+    kpsDisplay.setAttribute('style', 'font-size:16px!important;color:#51cf66!important;font-weight:bold!important;');
+    kpsDisplay.textContent = "0.0 KPS";
+    infoDiv.appendChild(kpsDisplay);
+
+    const kbWrapper = document.createElement('div');
+    kbWrapper.setAttribute('style', 'padding:10px!important;background:rgba(30,30,30,0.95)!important;border:2px solid #555!important;border-radius:12px!important;box-shadow:0 8px 25px rgba(0,0,0,0.6)!important;display:flex!important;flex-direction:column!important;gap:4px!important;');
+    container.appendChild(kbWrapper);
+
+    const keyboardRows = [
+        [
+            { label: '`', code: 'Backquote', side: 'left' }, { label: '1', code: 'Digit1', side: 'left' },
+            { label: '2', code: 'Digit2', side: 'left' }, { label: '3', code: 'Digit3', side: 'left' },
+            { label: '4', code: 'Digit4', side: 'left' }, { label: '5', code: 'Digit5', side: 'left' },
+            { label: '6', code: 'Digit6', side: 'right' }, { label: '7', code: 'Digit7', side: 'right' },
+            { label: '8', code: 'Digit8', side: 'right' }, { label: '9', code: 'Digit9', side: 'right' },
+            { label: '0', code: 'Digit0', side: 'right' }, { label: '-', code: 'Minus', side: 'right' },
+            { label: '=', code: 'Equal', side: 'right' }, { label: '\u2190', code: 'Backspace', side: 'right', w: '44px' }
+        ],
+        [
+            { label: 'Tab', code: 'Tab', side: 'left', w: '36px' }, { label: 'Q', code: 'KeyQ', side: 'left' },
+            { label: 'W', code: 'KeyW', side: 'left' }, { label: 'E', code: 'KeyE', side: 'left' },
+            { label: 'R', code: 'KeyR', side: 'left' }, { label: 'T', code: 'KeyT', side: 'left' },
+            { label: 'Y', code: 'KeyY', side: 'right' }, { label: 'U', code: 'KeyU', side: 'right' },
+            { label: 'I', code: 'KeyI', side: 'right' }, { label: 'O', code: 'KeyO', side: 'right' },
+            { label: 'P', code: 'KeyP', side: 'right' }, { label: '[', code: 'BracketLeft', side: 'right' },
+            { label: ']', code: 'BracketRight', side: 'right' }, { label: '\\', code: 'Backslash', side: 'right', w: '32px' }
+        ],
+        [
+            { label: 'Caps', code: 'CapsLock', side: 'left', w: '44px' }, { label: 'A', code: 'KeyA', side: 'left' },
+            { label: 'S', code: 'KeyS', side: 'left' }, { label: 'D', code: 'KeyD', side: 'left' },
+            { label: 'F', code: 'KeyF', side: 'left' }, { label: 'G', code: 'KeyG', side: 'left' },
+            { label: 'H', code: 'KeyH', side: 'right' }, { label: 'J', code: 'KeyJ', side: 'right' },
+            { label: 'K', code: 'KeyK', side: 'right' }, { label: 'L', code: 'KeyL', side: 'right' },
+            { label: ';', code: 'Semicolon', side: 'right' }, { label: "'", code: 'Quote', side: 'right' },
+            { label: 'Enter', code: 'Enter', side: 'right', w: '54px' }
+        ],
+        [
+            { label: 'Shift', code: 'ShiftLeft', side: 'left', w: '58px' }, { label: 'Z', code: 'KeyZ', side: 'left' },
+            { label: 'X', code: 'KeyX', side: 'left' }, { label: 'C', code: 'KeyC', side: 'left' },
+            { label: 'V', code: 'KeyV', side: 'left' }, { label: 'B', code: 'KeyB', side: 'left' },
+            { label: 'N', code: 'KeyN', side: 'right' }, { label: 'M', code: 'KeyM', side: 'right' },
+            { label: ',', code: 'Comma', side: 'right' }, { label: '.', code: 'Period', side: 'right' },
+            { label: '/', code: 'Slash', side: 'right' }, { label: 'Shift', code: 'ShiftRight', side: 'right', w: '66px' }
+        ],
+        [
+            { label: 'Ctrl', code: 'ControlLeft', side: 'left', w: '30px' }, { label: 'Win', code: 'MetaLeft', side: 'left', w: '30px' },
+            { label: 'Alt', code: 'AltLeft', side: 'left', w: '30px' }, { label: 'Space', code: 'Space', side: 'left', w: '160px' },
+            { label: 'Alt', code: 'AltRight', side: 'right', w: '30px' }, { label: 'Win', code: 'MetaRight', side: 'right', w: '30px' },
+            { label: 'Fn', code: 'Fn', side: 'right', w: '30px' }, { label: 'Ctrl', code: 'ControlRight', side: 'right', w: '30px' }
+        ]
+    ];
+
+    const keyDOMMap = {};
+    const activeKeys = new Set();
+    let keyTimestamps = [];
+
+    const aliasMap = {
+        'Control': 'ControlLeft', 'Alt': 'AltLeft', 'Shift': 'ShiftLeft', 'Meta': 'MetaLeft', ' ': 'Space', 'Enter': 'Enter', 'Backspace': 'Backspace'
+    };
+
+    keyboardRows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.setAttribute('style', 'display: flex !important; gap: 3px !important; align-items: center !important;');
+        
+        row.forEach(key => {
+            const keyDiv = document.createElement('div');
+            const width = key.w || '24px';
+            keyDiv.setAttribute('style', `width:${width}!important;height:24px!important;background:#2a2a2a!important;border:1px solid #444!important;border-radius:4px!important;color:#ccc!important;font-size:10px!important;font-weight:bold!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;transition:all 0.05s ease!important;`);
+            keyDiv.textContent = key.label;
+            keyDiv.dataset.code = key.code;
+            keyDiv.dataset.side = key.side;
+            
+            keyDOMMap[key.code] = keyDiv;
+            rowDiv.appendChild(keyDiv);
+        });
+        kbWrapper.appendChild(rowDiv);
+    });
+
+    setInterval(() => {
+        const now = Date.now();
+        keyTimestamps = keyTimestamps.filter(ts => now - ts < 1000);
+        kpsDisplay.textContent = keyTimestamps.length + '.0 KPS';
+    }, 100);
+
+    function findTargetCode(e) {
+        if (e.code && keyDOMMap[e.code]) return e.code;
+        if (aliasMap[e.key]) return aliasMap[e.key];
+        
+        const upperKey = e.key ? e.key.toUpperCase() : '';
+        const standardCode = 'Key' + upperKey;
+        if (keyDOMMap[standardCode]) return standardCode;
+        
+        const digitCode = 'Digit' + e.key;
+        if (keyDOMMap[digitCode]) return digitCode;
+
+        return null;
+    }
+
+    function handleKeyDown(e) {
+        const code = findTargetCode(e);
+        if (!code || !keyDOMMap[code]) return;
+        if (activeKeys.has(code)) return;
+        activeKeys.add(code);
+
+        keyTimestamps.push(Date.now());
+
+        const targetKey = keyDOMMap[code];
+        targetKey.style.background = '#ffb8b8';
+        targetKey.style.color = '#1e1e1e';
+        targetKey.style.transform = 'translateY(1px)';
+        
+        keyDisplay.textContent = "\ub204\ub9b8 \ud0a4: [ " + targetKey.textContent + " ]";
+
+        if (targetKey.dataset.side === 'left') {
+            leftPaw.style.transform = 'rotate(15deg) translateY(12px) scaleY(0.85)';
+        } else if (targetKey.dataset.side === 'right') {
+            rightPaw.style.transform = 'rotate(-15deg) translateY(12px) scaleY(0.85)';
+        }
+    }
+
+    function handleKeyUp(e) {
+        const code = findTargetCode(e);
+        if (!code || !keyDOMMap[code]) return;
+        activeKeys.delete(code);
+const targetKey = keyDOMMap[code]; targetKey.style.background = '#2a2a2a'; targetKey.style.color = '#ccc'; targetKey.style.transform = 'translateY(0px)'; if (targetKey.dataset.side === 'left') { leftPaw.style.transform = 'rotate(15deg) translateY(0px)'; } else if (targetKey.dataset.side === 'right') { rightPaw.style.transform = 'rotate(-15deg) translateY(0px)'; } } window.addEventListener('keydown', handleKeyDown, { capture: true, passive: true }); window.addEventListener('keyup', handleKeyUp, { capture: true, passive: true }); document.addEventListener('keydown', handleKeyDown, { capture: true, passive: true }); document.addEventListener('keyup', handleKeyUp, { capture: true, passive: true }); })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function() {
+    // 기존에 생성된 키보드가 있다면 중복 방지를 위해 완벽히 제거
+    if (window.catKeyboardContainer) {
+        window.catKeyboardContainer.remove();
+    }
+
+    const container = document.createElement('div');
+    window.catKeyboardContainer = container;
+    container.setAttribute('style', `
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 20px !important;
+        z-index: 2147483647 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        font-family: sans-serif !important;
+        user-select: none !important;
+        pointer-events: none !important;
+    `);
+    document.body.appendChild(container);
+
+    // 1. 고양이 위젯 영역
+    const catWrapper = document.createElement('div');
+    catWrapper.setAttribute('style', 'position:relative!important;width:100%!important;height:110px!important;background:#1e1e1e!important;border:3px solid #ffb8b8!important;border-radius:15px!important;box-shadow:0 8px 25px rgba(0,0,0,0.5)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding-top:10px!important;overflow:hidden!important;');
+    container.appendChild(catWrapper);
+
+    const catFace = document.createElement('div');
+    catFace.setAttribute('style', 'font-family:monospace!important;font-size:22px!important;white-space:pre!important;color:#ffffff!important;line-height:1.1!important;text-align:center!important;');
+    catFace.textContent = " /\\_/\\ \n( >.< )";
+    catWrapper.appendChild(catFace);
+
+    const leftPaw = document.createElement('div');
+    leftPaw.setAttribute('style', 'position:absolute!important;bottom:12px!important;left:40%!important;width:28px!important;height:38px!important;background:#ffffff!important;border:3px solid #ffb8b8!important;border-radius:15px 15px 10px 10px!important;transform:rotate(15deg) translateY(0px)!important;transition:transform 0.05s ease-in-out!important;');
+    catWrapper.appendChild(leftPaw);
+
+    const rightPaw = document.createElement('div');
+    rightPaw.setAttribute('style', 'position:absolute!important;bottom:12px!important;right:40%!important;width:28px!important;height:38px!important;background:#ffffff!important;border:3px solid #ffb8b8!important;border-radius:15px 15px 10px 10px!important;transform:rotate(-15deg) translateY(0px)!important;transition:transform 0.05s ease-in-out!important;');
+    catWrapper.appendChild(rightPaw);
+
+    const infoDiv = document.createElement('div');
+    infoDiv.setAttribute('style', 'position:absolute!important;top:8px!important;right:15px!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:3px!important;');
+    catWrapper.appendChild(infoDiv);
+
+    const keyDisplay = document.createElement('div');
+    keyDisplay.setAttribute('style', 'font-size:13px!important;color:#ffb8b8!important;font-weight:bold!important;');
+    keyDisplay.textContent = "누른 키: [ 대기 ]";
+    infoDiv.appendChild(keyDisplay);
+
+    const kpsDisplay = document.createElement('div');
+    kpsDisplay.setAttribute('style', 'font-size:16px!important;color:#51cf66!important;font-weight:bold!important;');
+    kpsDisplay.textContent = "0.0 KPS";
+    infoDiv.appendChild(kpsDisplay);
+
+    // 2. 61키 가상 키보드 영역
+    const kbWrapper = document.createElement('div');
+    kbWrapper.setAttribute('style', 'padding:10px!important;background:rgba(30,30,30,0.95)!important;border:2px solid #555!important;border-radius:12px!important;box-shadow:0 8px 25px rgba(0,0,0,0.6)!important;display:flex!important;flex-direction:column!important;gap:4px!important;');
+    container.appendChild(kbWrapper);
+
+    const keyboardRows = [
+        [
+            { label: '`', code: 'Backquote', side: 'left' }, { label: '1', code: 'Digit1', side: 'left' },
+            { label: '2', code: 'Digit2', side: 'left' }, { label: '3', code: 'Digit3', side: 'left' },
+            { label: '4', code: 'Digit4', side: 'left' }, { label: '5', code: 'Digit5', side: 'left' },
+            { label: '6', code: 'Digit6', side: 'right' }, { label: '7', code: 'Digit7', side: 'right' },
+            { label: '8', code: 'Digit8', side: 'right' }, { label: '9', code: 'Digit9', side: 'right' },
+            { label: '0', code: 'Digit0', side: 'right' }, { label: '-', code: 'Minus', side: 'right' },
+            { label: '=', code: 'Equal', side: 'right' }, { label: '←', code: 'Backspace', side: 'right', w: '46px' }
+        ],
+        [
+            { label: 'Tab', code: 'Tab', side: 'left', w: '38px' }, { label: 'Q', code: 'KeyQ', side: 'left' },
+            { label: 'W', code: 'KeyW', side: 'left' }, { label: 'E', code: 'KeyE', side: 'left' },
+            { label: 'R', code: 'KeyR', side: 'left' }, { label: 'T', code: 'KeyT', side: 'left' },
+            { label: 'Y', code: 'KeyY', side: 'right' }, { label: 'U', code: 'KeyU', side: 'right' },
+            { label: 'I', code: 'KeyI', side: 'right' }, { label: 'O', code: 'KeyO', side: 'right' },
+            { label: 'P', code: 'KeyP', side: 'right' }, { label: '[', code: 'BracketLeft', side: 'right' },
+            { label: ']', code: 'BracketRight', side: 'right' }, { label: '\\', code: 'Backslash', side: 'right', w: '32px' }
+        ],
+        [
+            { label: 'Caps', code: 'CapsLock', side: 'left', w: '46px' }, { label: 'A', code: 'KeyA', side: 'left' },
+            { label: 'S', code: 'KeyS', side: 'left' }, { label: 'D', code: 'KeyD', side: 'left' },
+            { label: 'F', code: 'KeyF', side: 'left' }, { label: 'G', code: 'KeyG', side: 'left' },
+            { label: 'H', code: 'KeyH', side: 'right' }, { label: 'J', code: 'KeyJ', side: 'right' },
+            { label: 'K', code: 'KeyK', side: 'right' }, { label: 'L', code: 'KeyL', side: 'right' },
+            { label: ';', code: 'Semicolon', side: 'right' }, { label: "'", code: 'Quote', side: 'right' },
+            { label: 'Enter', code: 'Enter', side: 'right', w: '54px' }
+        ],
+        [
+            { label: 'Shift', code: 'ShiftLeft', side: 'left', w: '58px' }, { label: 'Z', code: 'KeyZ', side: 'left' },
+            { label: 'X', code: 'KeyX', side: 'left' }, { label: 'C', code: 'KeyC', side: 'left' },
+            { label: 'V', code: 'KeyV', side: 'left' }, { label: 'B', code: 'KeyB', side: 'left' },
+            { label: 'N', code: 'KeyN', side: 'right' }, { label: 'M', code: 'KeyM', side: 'right' },
+            { label: ',', code: 'Comma', side: 'right' }, { label: '.', code: 'Period', side: 'right' },
+            { label: '/', code: 'Slash', side: 'right' }, { label: 'Shift', code: 'ShiftRight', side: 'right', w: '68px' }
+        ],
+        [
+            { label: 'Ctrl', code: 'ControlLeft', side: 'left', w: '30px' }, { label: 'Win', code: 'MetaLeft', side: 'left', w: '30px' },
+            { label: 'Alt', code: 'AltLeft', side: 'left', w: '30px' }, { label: 'Space', code: 'Space', side: 'left', w: '164px' },
+            { label: 'Alt', code: 'AltRight', side: 'right', w: '30px' }, { label: 'Win', code: 'MetaRight', side: 'right', w: '30px' },
+            { label: 'Fn', code: 'Fn', side: 'right', w: '30px' }, { label: 'Ctrl', code: 'ControlRight', side: 'right', w: '30px' }
+        ]
+    ];
+
+    const keyDOMMap = {};
+    const activeKeys = new Set();
+    const keyCounters = {}; // 봉캣 스타일 카운터 객체
+    let keyTimestamps = [];
+
+    const aliasMap = {
+        'Control': 'ControlLeft', 'Alt': 'AltLeft', 'Shift': 'ShiftLeft', 'Meta': 'MetaLeft', ' ': 'Space', 'Enter': 'Enter', 'Backspace': 'Backspace'
+    };
+
+    keyboardRows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.setAttribute('style', 'display: flex !important; gap: 3px !important; align-items: center !important;');
+        
+        row.forEach(key => {
+            const keyDiv = document.createElement('div');
+            const width = key.w || '26px'; // 카운터 숫자가 보이도록 너비 미세 확장
+            keyDiv.setAttribute('style', `
+                width: ${width} !important;
+                height: 32px !important; /* 위아래 간격 최적화 */
+                background: #2a2a2a !important;
+                border: 1px solid #444 !important;
+                border-radius: 4px !important;
+                color: #ccc !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                transition: all 0.05s ease !important;
+                padding: 1px 0 !important;
+            `);
+            
+            // 키 이름 라벨 엘리먼트
+            const labelSpan = document.createElement('span');
+            labelSpan.style.cssText = 'font-size: 10px !important; font-weight: bold !important; line-height: 1 !important;';
+            labelSpan.textContent = key.label;
+            keyDiv.appendChild(labelSpan);
+
+            // 실시간 카운터 엘리먼트
+            const countSpan = document.createElement('span');
+            countSpan.style.cssText = 'font-size: 8px !important; color: #888 !important; line-height: 1 !important; margin-top: 2px !important; font-family: monospace !important;';
+            countSpan.textContent = '0';
+            keyDiv.appendChild(countSpan);
+            
+            keyDOMMap[key.code] = { root: keyDiv, label: labelSpan, count: countSpan };
+            keyCounters[key.code] = 0; // 카운트 초기화
+            
+            keyDiv.dataset.code = key.code;
+            keyDiv.dataset.side = key.side;
+            
+            rowDiv.appendChild(keyDiv);
+        });
+        kbWrapper.appendChild(rowDiv);
+    });
+
+    setInterval(() => {
+        const now = Date.now();
+        keyTimestamps = keyTimestamps.filter(ts => now - ts < 1000);
+        kpsDisplay.textContent = keyTimestamps.length + '.0 KPS';
+    }, 100);
+
+    function findTargetCode(e) {
+        if (e.code && keyDOMMap[e.code]) return e.code;
+if (aliasMap[e.key]) return aliasMap[e.key];
+const upperKey = e.key ? e.key.toUpperCase() : '';
+const standardCode = 'Key' + upperKey;
+if (keyDOMMap[standardCode]) return standardCode;
+const digitCode = 'Digit' + e.key;
+if (keyDOMMap[digitCode]) return digitCode;
+return null;
+}
+function handleKeyDown(e) {
+const code = findTargetCode(e);
+if (!code || !keyDOMMap[code]) return;
+if (activeKeys.has(code)) return;
+activeKeys.add(code);
+keyTimestamps.push(Date.now());
+// 봉캣 카운터 1 증가 및 업데이트
+keyCounters[code]++;
+keyDOMMap[code].count.textContent = keyCounters[code];
+keyDOMMap[code].count.style.color = '#1e1e1e'; // 눌렸을 때 가독성을 위해 검은색 계열로 변경
+const targetKey = keyDOMMap[code].root;
+targetKey.style.background = '#ffb8b8';
+keyDOMMap[code].label.style.color = '#1e1e1e';
+targetKey.style.transform = 'translateY(1px)';
+keyDisplay.textContent = "누른 키: [ " + keyDOMMap[code].label.textContent + " ]";
+if (targetKey.dataset.side === 'left') {
+leftPaw.style.transform = 'rotate(15deg) translateY(12px) scaleY(0.85)';
+} else if (targetKey.dataset.side === 'right') {
+rightPaw.style.transform = 'rotate(-15deg) translateY(12px) scaleY(0.85)';
+}
+}
+function handleKeyUp(e) {
+const code = findTargetCode(e);
+if (!code || !keyDOMMap[code]) return;
+activeKeys.delete(code);
+keyDOMMap[code].count.style.color = '#888'; // 떼었을 때 흐릿하게 복구
+const targetKey = keyDOMMap[code].root;
+targetKey.style.background = '#2a2a2a';
+keyDOMMap[code].label.style.color = '#ccc';
+targetKey.style.transform = 'translateY(0px)';
+if (targetKey.dataset.side === 'left') {
+leftPaw.style.transform = 'rotate(15deg) translateY(0px)';
+} else if (targetKey.dataset.side === 'right') {
+rightPaw.style.transform = 'rotate(-15deg) translateY(0px)';
+}
+}
+// 윈도우 및 도큐먼트 전역에서 어떤 우선순위보다 앞서 캡처하도록 설정하여 우회력 극대화
+window.addEventListener('keydown', handleKeyDown, { capture: true, passive: true });
+window.addEventListener('keyup', handleKeyUp, { capture: true, passive: true });
+document.addEventListener('keydown', handleKeyDown, { capture: true, passive: true });
+document.addEventListener('keyup', handleKeyUp, { capture: true, passive: true });
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function() {
+    // 기존에 생성된 키보드가 있다면 중복 방지를 위해 완벽히 제거
+    if (window.catKeyboardContainer) {
+        window.catKeyboardContainer.remove();
+    }
+
+    const container = document.createElement('div');
+    window.catKeyboardContainer = container;
+    container.setAttribute('style', `
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 20px !important;
+        z-index: 2147483647 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        font-family: sans-serif !important;
+        user-select: none !important;
+        pointer-events: none !important;
+    `);
+    document.body.appendChild(container);
+
+    // 1. 역동적인 봉고캣 위젯 영역
+    const catWrapper = document.createElement('div');
+    catWrapper.setAttribute('style', 'position:relative!important;width:100%!important;height:120px!important;background:#1e1e1e!important;border:3px solid #ffb8b8!important;border-radius:15px!important;box-shadow:0 8px 25px rgba(0,0,0,0.5)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;padding-top:15px!important;overflow:hidden!important;');
+    container.appendChild(catWrapper);
+
+    // 봉고캣 텍스트 아트 프레임 정의 (기본, 왼손 다운, 오른손 다운, 양손 다운)
+    const catFrames = {
+        default: " /\\_/\\ \n( >.< ) \n/     \\",
+        left:    " /\\_/\\ \n( >.< ) \n/ 🐾   \\",
+        right:   " /\\_/\\ \n( >.< ) \n/   🐾 \\",
+        both:    " /\\_/\\ \n( >.< ) \n/ 🐾🐾 \\"
+    };
+
+    const catFace = document.createElement('div');
+    catFace.setAttribute('style', 'font-family:monospace!important;font-size:22px!important;white-space:pre!important;color:#ffffff!important;line-height:1.2!important;text-align:center!important;font-weight:bold!important;');
+    catFace.textContent = catFrames.default;
+    catWrapper.appendChild(catFace);
+
+    // 귀여운 둥근 솜방망이 디자인
+    const leftPaw = document.createElement('div');
+    leftPaw.setAttribute('style', 'position:absolute!important;bottom:10px!important;left:30%!important;width:32px!important;height:32px!important;background:#ffffff!important;border:3px solid #ffb8b8!important;border-radius:50%!important;transform:translateY(0px)!important;transition:transform 0.04s ease-in-out!important;box-shadow: 0 2px 5px rgba(0,0,0,0.3)!important;');
+    catWrapper.appendChild(leftPaw);
+
+    const rightPaw = document.createElement('div');
+    rightPaw.setAttribute('style', 'position:absolute!important;bottom:10px!important;right:30%!important;width:32px!important;height:32px!important;background:#ffffff!important;border:3px solid #ffb8b8!important;border-radius:50%!important;transform:translateY(0px)!important;transition:transform 0.04s ease-in-out!important;box-shadow: 0 2px 5px rgba(0,0,0,0.3)!important;');
+    catWrapper.appendChild(rightPaw);
+
+    const infoDiv = document.createElement('div');
+    infoDiv.setAttribute('style', 'position:absolute!important;top:8px!important;right:15px!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:3px!important;');
+    catWrapper.appendChild(infoDiv);
+
+    const keyDisplay = document.createElement('div');
+    keyDisplay.setAttribute('style', 'font-size:12px!important;color:#ffb8b8!important;font-weight:bold!important;');
+    keyDisplay.textContent = "누른 키: [ 대기 ]";
+    infoDiv.appendChild(keyDisplay);
+
+    const kpsDisplay = document.createElement('div');
+    kpsDisplay.setAttribute('style', 'font-size:16px!important;color:#51cf66!important;font-weight:bold!important;');
+    kpsDisplay.textContent = "0.0 KPS";
+    infoDiv.appendChild(kpsDisplay);
+
+    // 2. 61키 가상 키보드 영역
+    const kbWrapper = document.createElement('div');
+    kbWrapper.setAttribute('style', 'padding:10px!important;background:rgba(30,30,30,0.95)!important;border:2px solid #555!important;border-radius:12px!important;box-shadow:0 8px 25px rgba(0,0,0,0.6)!important;display:flex!important;flex-direction:column!important;gap:4px!important;');
+    container.appendChild(kbWrapper);
+
+    const keyboardRows = [
+        [
+            { label: '`', code: 'Backquote', side: 'left' },
+            { label: '1', code: 'Digit1', side: 'left' },
+            { label: '2', code: 'Digit2', side: 'left' },
+            { label: '3', code: 'Digit3', side: 'left' },
+            { label: '4', code: 'Digit4', side: 'left' },
+            { label: '5', code: 'Digit5', side: 'left' },
+            { label: '6', code: 'Digit6', side: 'right' },
+            { label: '7', code: 'Digit7', side: 'right' },
+            { label: '8', code: 'Digit8', side: 'right' },
+            { label: '9', code: 'Digit9', side: 'right' },
+            { label: '0', code: 'Digit0', side: 'right' },
+            { label: '-', code: 'Minus', side: 'right' },
+            { label: '=', code: 'Equal', side: 'right' },
+            { label: '←', code: 'Backspace', side: 'right', w: '46px' }
+        ],
+        [
+            { label: 'Tab', code: 'Tab', side: 'left', w: '38px' },
+            { label: 'Q', code: 'KeyQ', side: 'left' },
+            { label: 'W', code: 'KeyW', side: 'left' },
+            { label: 'E', code: 'KeyE', side: 'left' },
+            { label: 'R', code: 'KeyR', side: 'left' },
+            { label: 'T', code: 'KeyT', side: 'left' },
+            { label: 'Y', code: 'KeyY', side: 'right' },
+            { label: 'U', code: 'KeyU', side: 'right' },
+            { label: 'I', code: 'KeyI', side: 'right' },
+            { label: 'O', code: 'KeyO', side: 'right' },
+            { label: 'P', code: 'KeyP', side: 'right' },
+            { label: '[', code: 'BracketLeft', side: 'right' },
+            { label: ']', code: 'BracketRight', side: 'right' },
+            { label: '\\', code: 'Backslash', side: 'right', w: '32px' }
+        ],
+        [
+            { label: 'Caps', code: 'CapsLock', side: 'left', w: '46px' },
+            { label: 'A', code: 'KeyA', side: 'left' },
+            { label: 'S', code: 'KeyS', side: 'left' },
+            { label: 'D', code: 'KeyD', side: 'left' },
+            { label: 'F', code: 'KeyF', side: 'left' },
+            { label: 'G', code: 'KeyG', side: 'left' },
+            { label: 'H', code: 'KeyH', side: 'right' },
+            { label: 'J', code: 'KeyJ', side: 'right' },
+            { label: 'K', code: 'KeyK', side: 'right' },
+            { label: 'L', code: 'KeyL', side: 'right' },
+            { label: ';', code: 'Semicolon', side: 'right' },
+            { label: "'", code: 'Quote', side: 'right' },
+            { label: 'Enter', code: 'Enter', side: 'right', w: '54px' }
+        ],
+        [
+            { label: 'Shift', code: 'ShiftLeft', side: 'left', w: '58px' },
+            { label: 'Z', code: 'KeyZ', side: 'left' },
+            { label: 'X', code: 'KeyX', side: 'left' },
+            { label: 'C', code: 'KeyC', side: 'left' },
+            { label: 'V', code: 'KeyV', side: 'left' },
+            { label: 'B', code: 'KeyB', side: 'left' },
+            { label: 'N', code: 'KeyN', side: 'right' },
+            { label: 'M', code: 'KeyM', side: 'right' },
+            { label: ',', code: 'Comma', side: 'right' },
+            { label: '.', code: 'Period', side: 'right' },
+            { label: '/', code: 'Slash', side: 'right' },
+            { label: 'Shift', code: 'ShiftRight', side: 'right', w: '68px' }
+        ],
+        [
+            { label: 'Ctrl', code: 'ControlLeft', side: 'left', w: '30px' },
+            { label: 'Win', code: 'MetaLeft', side: 'left', w: '30px' },
+            { label: 'Alt', code: 'AltLeft', side: 'left', w: '30px' },
+            { label: 'Space', code: 'Space', side: 'left', w: '164px' },
+            { label: 'Alt', code: 'AltRight', side: 'right', w: '30px' },
+            { label: 'Win', code: 'MetaRight', side: 'right', w: '30px' },
+            { label: 'Fn', code: 'Fn', side: 'right', w: '30px' },
+            { label: 'Ctrl', code: 'ControlRight', side: 'right', w: '30px' }
+        ]
+    ];
+
+    const keyDOMMap = {};
+    const activeKeys = new Set();
+    const keyCounters = {}; 
+    let keyTimestamps = [];
+
+    const aliasMap = {
+        'Control': 'ControlLeft',
+        'Alt': 'AltLeft',
+        'Shift': 'ShiftLeft',
+        'Meta': 'MetaLeft',
+        ' ': 'Space',
+        'Enter': 'Enter',
+        'Backspace': 'Backspace'
+    };
+
+    keyboardRows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.setAttribute('style', 'display: flex !important; gap: 3px !important; align-items: center !important;');
+        row.forEach(key => {
+            const keyDiv = document.createElement('div');
+            const width = key.w || '26px';
+            keyDiv.setAttribute('style', `
+                width: ${width} !important;
+                height: 32px !important;
+                background: #2a2a2a !important;
+                border: 1px solid #444 !important;
+                border-radius: 4px !important;
+                color: #ccc !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                transition: all 0.05s ease !important;
+                padding: 1px 0 !important;
+            `);
+
+            const labelSpan = document.createElement('span');
+            labelSpan.style.cssText = 'font-size: 10px !important; font-weight: bold !important; line-height: 1 !important;';
+            labelSpan.textContent = key.label;
+            keyDiv.appendChild(labelSpan);
+
+            const countSpan = document.createElement('span');
+            countSpan.style.cssText = 'font-size: 8px !important; color: #888 !important; line-height: 1 !important; margin-top: 2px !important; font-family: monospace !important;';
+            countSpan.textContent = '0';
+            keyDiv.appendChild(countSpan);
+
+keyDOMMap[key.code] = { root: keyDiv, label: labelSpan, count: countSpan };
+keyCounters[key.code] = 0;
+keyDiv.dataset.code = key.code;
+keyDiv.dataset.side = key.side;
+rowDiv.appendChild(keyDiv);
+});
+kbWrapper.appendChild(rowDiv);
+});
+setInterval(() => {
+const now = Date.now();
+keyTimestamps = keyTimestamps.filter(ts => now - ts < 1000);
+kpsDisplay.textContent = keyTimestamps.length + '.0 KPS';
+}, 100);
+function findTargetCode(e) {
+if (e.code && keyDOMMap[e.code]) return e.code;
+if (aliasMap[e.key]) return aliasMap[e.key];
+const upperKey = e.key ? e.key.toUpperCase() : '';
+const standardCode = 'Key' + upperKey;
+if (keyDOMMap[standardCode]) return standardCode;
+const digitCode = 'Digit' + e.key;
+if (keyDOMMap[digitCode]) return digitCode;
+return null;
+}
+// 봉고캣 애니메이션 업데이트 (스페이스바 양손 기능 반영)
+function updateBongoCatAnimation() {
+let hasLeft = false;
+let hasRight = false;
+let isSpacePressed = activeKeys.has('Space'); // 스페이스바가 눌렸는지 확인
+// 스페이스바가 눌려있다면 무조건 양손 상태로 취급
+if (isSpacePressed) {
+hasLeft = true;
+hasRight = true;
+} else {
+activeKeys.forEach(code => {
+if (keyDOMMap[code]) {
+if (keyDOMMap[code].root.dataset.side === 'left') hasLeft = true;
+if (keyDOMMap[code].root.dataset.side === 'right') hasRight = true;
+}
+});
+}
+// 1. 텍스트 아트 애니메이션 업데이트
+if (hasLeft && hasRight) {
+catFace.textContent = catFrames.both;
+} else if (hasLeft) {
+catFace.textContent = catFrames.left;
+} else if (hasRight) {
+catFace.textContent = catFrames.right;
+} else {
+catFace.textContent = catFrames.default;
+}
+// 2. 물리 솜방망이 업데이트
+if (hasLeft) {
+leftPaw.style.transform = 'translateY(45px) scale(0.9)';
+leftPaw.style.background = '#ffb8b8';
+} else {
+leftPaw.style.transform = 'translateY(0px) scale(1)';
+leftPaw.style.background = '#ffffff';
+}
+if (hasRight) {
+rightPaw.style.transform = 'translateY(45px) scale(0.9)';
+rightPaw.style.background = '#ffb8b8';
+} else {
+rightPaw.style.transform = 'translateY(0px) scale(1)';
+rightPaw.style.background = '#ffffff';
+}
+}
+function handleKeyDown(e) {
+const code = findTargetCode(e);
+if (!code || !keyDOMMap[code]) return;
+if (activeKeys.has(code)) return;
+activeKeys.add(code);
+keyTimestamps.push(Date.now());
+keyCounters[code]++;
+keyDOMMap[code].count.textContent = keyCounters[code];
+keyDOMMap[code].count.style.color = '#1e1e1e';
+const targetKey = keyDOMMap[code].root;
+targetKey.style.background = '#ffb8b8';
+keyDOMMap[code].label.style.color = '#1e1e1e';
+targetKey.style.transform = 'translateY(1px)';
+keyDisplay.textContent = "누른 키: [ " + keyDOMMap[code].label.textContent + " ]";
+updateBongoCatAnimation();
+}
+function handleKeyUp(e) {
+const code = findTargetCode(e);
+if (!code || !keyDOMMap[code]) return;
+activeKeys.delete(code);
+keyDOMMap[code].count.style.color = '#888';
+const targetKey = keyDOMMap[code].root;
+targetKey.style.background = '#2a2a2a';
+keyDOMMap[code].label.style.color = '#ccc';
+targetKey.style.transform = 'translateY(0px)';
+updateBongoCatAnimation();
+}
+window.addEventListener('keydown', handleKeyDown, { capture: true, passive: true });
+window.addEventListener('keyup', handleKeyUp, { capture: true, passive: true });
+document.addEventListener('keydown', handleKeyDown, { capture: true, passive: true });
+document.addEventListener('keyup', handleKeyUp, { capture: true, passive: true });
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function() {
+    'use strict';
+   
+    // 기존에 실행된 위젯이 있다면 제거
+    const existing = document.getElementById('bongo-cat-widget');
+    if (existing) existing.remove();
+
+    // 메인 컨테이너 생성 (왼쪽 아래 고정)
+    const container = document.createElement('div');
+    container.id = 'bongo-cat-widget';
+    container.style.position = 'fixed';
+    container.style.bottom = '20px';
+    container.style.left = '20px';
+    container.style.zIndex = '2147483647';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';
+    container.style.fontFamily = 'Segoe UI, sans-serif';
+    container.style.userSelect = 'none';
+    container.style.background = '#18181b';
+    container.style.padding = '14px';
+    container.style.borderRadius = '18px';
+    container.style.border = '3px solid #ffb8b8';
+    container.style.boxShadow = '0 12px 35px rgba(0,0,0,0.7)';
+    document.body.appendChild(container);
+
+    // 고양이, 더 작고 아담한 반원형 머리, 삼각형 귀, 회색 패드, 마우스 및 앞발 영역
+    const catBox = document.createElement('div');
+    catBox.style.width = '360px';
+    catBox.style.height = '160px';
+    catBox.style.background = '#ffffff';
+    catBox.style.border = '3px solid #000000';
+    catBox.style.borderRadius = '12px';
+    catBox.style.overflow = 'hidden';
+    catBox.style.position = 'relative';
+    container.appendChild(catBox);
+
+    catBox.innerHTML = `
+        <svg viewBox="0 0 400 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="200" fill="white"/>
+           
+            <!-- 책상 선 -->
+            <line x1="0" y1="140" x2="400" y2="140" stroke="black" stroke-width="6"/>
+           
+            <!-- 회색 노트북 패드 -->
+            <rect x="25" y="115" width="105" height="55" rx="6" fill="#d4d4d8" stroke="black" stroke-width="3"/>
+           
+            <!-- 180도 회전된 마우스 그림 -->
+            <g id="mouse-obj" style="transition: 0.05s; transform-origin: 70px 133px;">
+                <g transform="rotate(180, 70, 133)">
+                    <rect x="55" y="110" width="30" height="46" rx="15" fill="#f4f4f5" stroke="black" stroke-width="3"/>
+                    <line x1="70" y1="110" x2="70" y2="130" stroke="black" stroke-width="2"/>
+                </g>
+            </g>
+           
+            <!-- 고양이 전체 그룹 (오른쪽으로 15px 이동) -->
+            <g transform="translate(15, 0)">
+                <!-- 왼쪽 삼각형 귀 -->
+                <path d="M 153 52 L 140 16 L 175 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>
+               
+                <!-- 오른쪽 삼각형 귀 -->
+                <path d="M 247 52 L 260 16 L 225 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>
+               
+                <!-- 고양이 머리 본체 (더 작고 아담한 반원형 돔 형태) -->
+                <path d="M 150 140 L 150 90 A 50 50 0 0 1 250 90 L 250 140 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>
+               
+                <!-- 눈과 w 모양 입 -->
+                <circle id="left-eye" cx="178" cy="110" r="5" fill="black"/>
+                <circle id="right-eye" cx="222" cy="110" r="5" fill="black"/>
+                <path id="cat-mouth" d="M 195 118 Q 200 123 205 118" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/>
+
+                <!-- 타자칠 때 나타나는 앞발 -->
+                <ellipse id="paw-left" cx="145" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />
+                <ellipse id="paw-right" cx="255" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />
+            </g>
+        </svg>
+    `;
+
+    // 정보 표시 바
+    const infoBox = document.createElement('div');
+    infoBox.style.display = 'flex';
+    infoBox.style.justifyContent = 'space-between';
+    infoBox.style.alignItems = 'center';
+    infoBox.style.fontSize = '11px';
+    infoBox.style.fontWeight = 'bold';
+    infoBox.style.padding = '0 4px';
+    container.appendChild(infoBox);
+
+    const keyDisplay = document.createElement('div');
+    keyDisplay.style.color = '#ffb8b8';
+    keyDisplay.textContent = '입력: [ 대기 ]';
+    infoBox.appendChild(keyDisplay);
+
+    const mouseClickDisplay = document.createElement('div');
+    mouseClickDisplay.style.color = '#38bdf8';
+    mouseClickDisplay.textContent = '마우스: 0회';
+    infoBox.appendChild(mouseClickDisplay);
+
+    const countDisplay = document.createElement('div');
+    countDisplay.style.color = '#74c0fc';
+    countDisplay.textContent = '총 타수: 0';
+    infoBox.appendChild(countDisplay);
+
+    const kpsDisplay = document.createElement('div');
+    kpsDisplay.style.color = '#51cf66';
+    kpsDisplay.textContent = '0.0 KPS';
+    infoBox.appendChild(kpsDisplay);
+
+    // 61키 가상 키보드 영역
+    const kbContainer = document.createElement('div');
+    kbContainer.style.display = 'flex';
+    kbContainer.style.flexDirection = 'column';
+    kbContainer.style.gap = '3px';
+    container.appendChild(kbContainer);
+
+    const keyboardRows = [
+        [
+            { label: '`', code: 'Backquote', w: '24px' },
+            { label: '1', code: 'Digit1', w: '24px' }, { label: '2', code: 'Digit2', w: '24px' }, { label: '3', code: 'Digit3', w: '24px' },
+            { label: '4', code: 'Digit4', w: '24px' }, { label: '5', code: 'Digit5', w: '24px' }, { label: '6', code: 'Digit6', w: '24px' },
+            { label: '7', code: 'Digit7', w: '24px' }, { label: '8', code: 'Digit8', w: '24px' }, { label: '9', code: 'Digit9', w: '24px' },
+            { label: '0', code: 'Digit0', w: '24px' }, { label: '-', code: 'Minus', w: '24px' }, { label: '=', code: 'Equal', w: '24px' },
+            { label: 'Bksp', code: 'Backspace', w: '44px' }
+        ],
+        [
+            { label: 'Tab', code: 'Tab', w: '38px' },
+            { label: 'Q', code: 'KeyQ', w: '24px' }, { label: 'W', code: 'KeyW', w: '24px' }, { label: 'E', code: 'KeyE', w: '24px' },
+            { label: 'R', code: 'KeyR', w: '24px' }, { label: 'T', code: 'KeyT', w: '24px' }, { label: 'Y', code: 'KeyY', w: '24px' },
+            { label: 'U', code: 'KeyU', w: '24px' }, { label: 'I', code: 'KeyI', w: '24px' }, { label: 'O', code: 'KeyO', w: '24px' },
+            { label: 'P', code: 'KeyP', w: '24px' }, { label: '[', code: 'BracketLeft', w: '24px' }, { label: ']', code: 'BracketRight', w: '24px' },
+            { label: '\\', code: 'Backslash', w: '34px' }
+        ],
+        [
+            { label: 'Caps', code: 'CapsLock', w: '44px' },
+            { label: 'A', code: 'KeyA', w: '24px' }, { label: 'S', code: 'KeyS', w: '24px' }, { label: 'D', code: 'KeyD', w: '24px' },
+            { label: 'F', code: 'KeyF', w: '24px' }, { label: 'G', code: 'KeyG', w: '24px' }, { label: 'H', code: 'KeyH', w: '24px' },
+            { label: 'J', code: 'KeyJ', w: '24px' }, { label: 'K', code: 'KeyK', w: '24px' }, { label: 'L', code: 'KeyL', w: '24px' },
+            { label: ';', code: 'Semicolon', w: '24px' }, { label: "'", code: 'Quote', w: '24px' },
+            { label: 'Enter', code: 'Enter', w: '50px' }
+        ],
+        [
+            { label: 'Shift', code: 'ShiftLeft', w: '56px' },
+            { label: 'Z', code: 'KeyZ', w: '24px' }, { label: 'X', code: 'KeyX', w: '24px' }, { label: 'C', code: 'KeyC', w: '24px' },
+            { label: 'V', code: 'KeyV', w: '24px' }, { label: 'B', code: 'KeyB', w: '24px' }, { label: 'N', code: 'KeyN', w: '24px' },
+            { label: 'M', code: 'KeyM', w: '24px' }, { label: ',', code: 'Comma', w: '24px' }, { label: '.', code: 'Period', w: '24px' },
+            { label: '/', code: 'Slash', w: '24px' }, { label: 'Shift', code: 'ShiftRight', w: '56px' }
+        ],
+        [
+            { label: 'Ctrl', code: 'ControlLeft', w: '32px' },
+            { label: 'Win', code: 'MetaLeft', w: '32px' },
+            { label: 'Alt', code: 'AltLeft', w: '32px' },
+            { label: 'Space', code: 'Space', w: '140px' },
+            { label: 'Alt', code: 'AltRight', w: '32px' },
+            { label: 'Fn', code: 'Fn', w: '32px' },
+            { label: 'Ctrl', code: 'ControlRight', w: '32px' }
+        ]
+    ];
+
+    const keyElementsMap = {};
+    const keyCounts = {};
+    let totalKeyPressCount = 0;
+    let mouseClickCount = 0;
+    let keyTimestamps = [];
+    let lastHand = 'right';
+
+    function updateKPS() {
+        const now = Date.now();
+        keyTimestamps = keyTimestamps.filter(time => now - time < 1000);
+        kpsDisplay.textContent = `${keyTimestamps.length.toFixed(1)} KPS`;
+    }
+
+    if (window.bongoKpsInterval) clearInterval(window.bongoKpsInterval);
+    window.bongoKpsInterval = setInterval(updateKPS, 100);
+
+    keyboardRows.forEach(rowKeys => {
+        const rowDiv = document.createElement('div');
+        rowDiv.style.display = 'flex';
+        rowDiv.style.gap = '3px';
+        rowDiv.style.justifyContent = 'center';
+       
+        rowKeys.forEach(keyInfo => {
+            keyCounts[keyInfo.code] = 0;
+           
+            const keyEl = document.createElement('div');
+            keyEl.style.width = keyInfo.w;
+            keyEl.style.height = '34px';
+            keyEl.style.background = '#27272a';
+            keyEl.style.border = '1px solid #3f3f46';
+            keyEl.style.borderRadius = '5px';
+            keyEl.style.color = '#fff';
+            keyEl.style.display = 'flex';
+            keyEl.style.flexDirection = 'column';
+            keyEl.style.alignItems = 'center';
+            keyEl.style.justifyContent = 'center';
+            keyEl.style.fontSize = '10px';
+            keyEl.style.fontWeight = 'bold';
+            keyEl.style.boxShadow = '0 2px 0 #18181b';
+            keyEl.style.transition = '0.05s ease';
+            keyEl.style.overflow = 'hidden';
+           
+            keyEl.innerHTML = `<span style="font-size: 9px; line-height: 1;">${keyInfo.label}</span><span class="count-badge" style="font-size: 8px; color: #a1a1aa; font-weight: normal; margin-top: 2px;">0</span>`;
+            rowDiv.appendChild(keyEl);
+            keyElementsMap[keyInfo.code.toLowerCase()] = { el: keyEl, code: keyInfo.code };
+        });
+        kbContainer.appendChild(rowDiv);
+    });
+
+    // 키보드 입력 이벤트
+    window.addEventListener('keydown', function(event) {
+        if (event.repeat) return;
+
+        keyTimestamps.push(Date.now());
+        totalKeyPressCount++;
+        updateKPS();
+
+        countDisplay.textContent = `총 타수: ${totalKeyPressCount}`;
+
+        let keyName = event.key === ' ' ? 'Space' : event.key;
+        if (event.code.startsWith('Digit')) keyName = event.code.replace('Digit', '');
+        keyDisplay.textContent = `입력: [ ${keyName.toUpperCase()} ]`;
+
+        let targetObj = keyElementsMap[event.code.toLowerCase()];
+        if (!targetObj && event.key === ' ') {
+            targetObj = Object.values(keyElementsMap).find(k => k.code === 'Space');
+        }
+
+        if (targetObj && targetObj.code) {
+            const realCode = targetObj.code;
+            keyCounts[realCode] = (keyCounts[realCode] || 0) + 1;
+           
+            const targetEl = targetObj.el;
+            if (targetEl) {
+                targetEl.style.background = '#ffb8b8';
+                targetEl.style.color = '#000';
+                targetEl.style.transform = 'translateY(2px)';
+                targetEl.style.boxShadow = '0 0 0 #18181b';
+               
+                const badge = targetEl.querySelector('.count-badge');
+                if (badge) {
+                    badge.textContent = keyCounts[realCode];
+                    badge.style.color = '#000';
+                }
+            }
+        }
+
+        const pawLeft = document.getElementById('paw-left');
+        const pawRight = document.getElementById('paw-right');
+        const leftEye = document.getElementById('left-eye');
+        const rightEye = document.getElementById('right-eye');
+
+        if (lastHand === 'right') {
+            if (pawLeft) pawLeft.style.display = 'block';
+            if (pawRight) pawRight.style.display = 'none';
+            if (leftEye) leftEye.setAttribute('cy', '112');
+            if (rightEye) rightEye.setAttribute('cy', '107');
+            lastHand = 'left';
+        } else {
+            if (pawLeft) pawLeft.style.display = 'none';
+            if (pawRight) pawRight.style.display = 'block';
+            if (leftEye) leftEye.setAttribute('cy', '107');
+            if (rightEye) rightEye.setAttribute('cy', '112');
+            lastHand = 'right';
+        }
+    }, true);
+
+    window.addEventListener('keyup', function(event) {
+        let targetObj = keyElementsMap[event.code.toLowerCase()];
+        if (!targetObj && event.key === ' ') {
+            targetObj = Object.values(keyElementsMap).find(k => k.code === 'Space');
+        }
+
+        if (targetObj && targetObj.el) {
+            targetObj.el.style.background = '#27272a';
+            targetObj.el.style.color = '#fff';
+            targetObj.el.style.transform = 'translateY(0)';
+            targetObj.el.style.boxShadow = '0 2px 0 #18181b';
+           
+            const badge = targetObj.el.querySelector('.count-badge');
+            if (badge) {
+                badge.style.color = '#a1a1aa';
+            }
+        }
+
+        const pawLeft = document.getElementById('paw-left');
+        const pawRight = document.getElementById('paw-right');
+        const leftEye = document.getElementById('left-eye');
+        const rightEye = document.getElementById('right-eye');
+
+        if (pawLeft) pawLeft.style.display = 'none';
+        if (pawRight) pawRight.style.display = 'none';
+        if (leftEye) leftEye.setAttribute('cy', '110');
+        if (rightEye) rightEye.setAttribute('cy', '110');
+    }, true);
+
+    // 마우스 클릭 이벤트 (마우스 그림 클릭 시 살짝 눌리는 애니메이션)
+    window.addEventListener('mousedown', function(event) {
+        mouseClickCount++;
+        mouseClickDisplay.textContent = `마우스: ${mouseClickCount}회`;
+       
+        let btnName = event.button === 2 ? '우클릭' : (event.button === 1 ? '휠클릭' : '좌클릭');
+        keyDisplay.textContent = `입력: [ ${btnName} ]`;
+
+        const mouseObj = document.getElementById('mouse-obj');
+        if (mouseObj) {
+            mouseObj.style.transform = 'translate(0, 3px) scale(0.95)';
+        }
+    }, true);
+
+    window.addEventListener('mouseup', function(event) {
+        const mouseObj = document.getElementById('mouse-obj');
+        if (mouseObj) {
+            mouseObj.style.transform = 'translate(0, 0) scale(1)';
+        }
+    }, true);
+
+    console.log('얼굴 크기를 조금 더 줄이고 완벽한 반원형 돔 모양으로 적용된 봉고캣 위젯이 장착되었습니다!');
+})();
+
+
+
+
+(function() {
+    'use strict';
+   
+    // 기존에 실행된 위젯이 있다면 제거
+    const existing = document.getElementById('bongo-cat-widget');
+    if (existing) existing.remove();
+
+    // 메인 컨테이너 생성 (왼쪽 아래 고정)
+    const container = document.createElement('div');
+    container.id = 'bongo-cat-widget';
+    container.style.position = 'fixed';
+    container.style.bottom = '20px';
+    container.style.left = '20px';
+    container.style.zIndex = '2147483647';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';
+    container.style.fontFamily = 'Segoe UI, sans-serif';
+    container.style.userSelect = 'none';
+    container.style.background = '#18181b';
+    container.style.padding = '14px';
+    container.style.borderRadius = '18px';
+    container.style.border = '3px solid #ffb8b8';
+    container.style.boxShadow = '0 12px 35px rgba(0,0,0,0.7)';
+    document.body.appendChild(container);
+
+    // 고양이, 더 작고 아담한 반원형 머리, 삼각형 귀, 회색 패드, 마우스 및 앞발 영역
+    const catBox = document.createElement('div');
+    catBox.style.width = '360px';
+    catBox.style.height = '160px';
+    catBox.style.background = '#ffffff';
+    catBox.style.border = '3px solid #000000';
+    catBox.style.borderRadius = '12px';
+    catBox.style.overflow = 'hidden';
+    catBox.style.position = 'relative';
+    container.appendChild(catBox);
+
+    catBox.innerHTML = `
+        <svg viewBox="0 0 400 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="200" fill="white"/>
+           
+            <!-- 책상 선 -->
+            <line x1="0" y1="140" x2="400" y2="140" stroke="black" stroke-width="6"/>
+           
+            <!-- 회색 노트북 패드 -->
+            <rect x="25" y="115" width="105" height="55" rx="6" fill="#d4d4d8" stroke="black" stroke-width="3"/>
+           
+            <!-- 180도 회전된 마우스 그림 -->
+            <g id="mouse-obj" style="transition: 0.05s; transform-origin: 70px 133px;">
+                <g transform="rotate(180, 70, 133)">
+                    <rect x="55" y="110" width="30" height="46" rx="15" fill="#f4f4f5" stroke="black" stroke-width="3"/>
+                    <line x1="70" y1="110" x2="70" y2="130" stroke="black" stroke-width="2"/>
+                </g>
+            </g>
+           
+            <!-- 고양이 전체 그룹 (오른쪽으로 15px 이동) -->
+            <g transform="translate(15, 0)">
+                <!-- 왼쪽 삼각형 귀 -->
+                <path d="M 153 52 L 140 16 L 175 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>
+               
+                <!-- 오른쪽 삼각형 귀 -->
+                <path d="M 247 52 L 260 16 L 225 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>
+               
+                <!-- 고양이 머리 본체 (더 작고 아담한 반원형 돔 형태) -->
+                <path d="M 150 140 L 150 90 A 50 50 0 0 1 250 90 L 250 140 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>
+               
+                <!-- 눈과 w 모양 입 -->
+                <circle id="left-eye" cx="178" cy="110" r="5" fill="black"/>
+                <circle id="right-eye" cx="222" cy="110" r="5" fill="black"/>
+                <path id="cat-mouth" d="M 195 118 Q 200 123 205 118" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/>
+
+                <!-- 타자칠 때 나타나는 앞발 -->
+                <ellipse id="paw-left" cx="145" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />
+                <ellipse id="paw-right" cx="255" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />
+            </g>
+        </svg>
+    `;
+
+    // 정보 표시 바
+    const infoBox = document.createElement('div');
+    infoBox.style.display = 'flex';
+    infoBox.style.justifyContent = 'space-between';
+    infoBox.style.alignItems = 'center';
+    infoBox.style.fontSize = '11px';
+    infoBox.style.fontWeight = 'bold';
+    infoBox.style.padding = '0 4px';
+    container.appendChild(infoBox);
+
+    const keyDisplay = document.createElement('div');
+    keyDisplay.style.color = '#ffb8b8';
+    keyDisplay.textContent = '입력: [ 대기 ]';
+    infoBox.appendChild(keyDisplay);
+
+    const mouseClickDisplay = document.createElement('div');
+    mouseClickDisplay.style.color = '#38bdf8';
+    mouseClickDisplay.textContent = '마우스: 0회';
+    infoBox.appendChild(mouseClickDisplay);
+
+    const countDisplay = document.createElement('div');
+    countDisplay.style.color = '#74c0fc';
+    countDisplay.textContent = '총 타수: 0';
+    infoBox.appendChild(countDisplay);
+
+    const kpsDisplay = document.createElement('div');
+    kpsDisplay.style.color = '#51cf66';
+    kpsDisplay.textContent = '0.0 KPS';
+    infoBox.appendChild(kpsDisplay);
+
+    // 61키 가상 키보드 영역
+    const kbContainer = document.createElement('div');
+    kbContainer.style.display = 'flex';
+    kbContainer.style.flexDirection = 'column';
+    kbContainer.style.gap = '3px';
+    container.appendChild(kbContainer);
+
+    const keyboardRows = [
+        [
+            { label: '`', code: 'Backquote', w: '24px' },
+            { label: '1', code: 'Digit1', w: '24px' }, { label: '2', code: 'Digit2', w: '24px' }, { label: '3', code: 'Digit3', w: '24px' },
+            { label: '4', code: 'Digit4', w: '24px' }, { label: '5', code: 'Digit5', w: '24px' }, { label: '6', code: 'Digit6', w: '24px' },
+            { label: '7', code: 'Digit7', w: '24px' }, { label: '8', code: 'Digit8', w: '24px' }, { label: '9', code: 'Digit9', w: '24px' },
+            { label: '0', code: 'Digit0', w: '24px' }, { label: '-', code: 'Minus', w: '24px' }, { label: '=', code: 'Equal', w: '24px' },
+            { label: 'Bksp', code: 'Backspace', w: '44px' }
+        ],
+        [
+            { label: 'Tab', code: 'Tab', w: '38px' },
+            { label: 'Q', code: 'KeyQ', w: '24px' }, { label: 'W', code: 'KeyW', w: '24px' }, { label: 'E', code: 'KeyE', w: '24px' },
+            { label: 'R', code: 'KeyR', w: '24px' }, { label: 'T', code: 'KeyT', w: '24px' }, { label: 'Y', code: 'KeyY', w: '24px' },
+            { label: 'U', code: 'KeyU', w: '24px' }, { label: 'I', code: 'KeyI', w: '24px' }, { label: 'O', code: 'KeyO', w: '24px' },
+            { label: 'P', code: 'KeyP', w: '24px' }, { label: '[', code: 'BracketLeft', w: '24px' }, { label: ']', code: 'BracketRight', w: '24px' },
+            { label: '\\', code: 'Backslash', w: '34px' }
+        ],
+        [
+            { label: 'Caps', code: 'CapsLock', w: '44px' },
+            { label: 'A', code: 'KeyA', w: '24px' }, { label: 'S', code: 'KeyS', w: '24px' }, { label: 'D', code: 'KeyD', w: '24px' },
+            { label: 'F', code: 'KeyF', w: '24px' }, { label: 'G', code: 'KeyG', w: '24px' }, { label: 'H', code: 'KeyH', w: '24px' },
+            { label: 'J', code: 'KeyJ', w: '24px' }, { label: 'K', code: 'KeyK', w: '24px' }, { label: 'L', code: 'KeyL', w: '24px' },
+            { label: ';', code: 'Semicolon', w: '24px' }, { label: "'", code: 'Quote', w: '24px' },
+            { label: 'Enter', code: 'Enter', w: '50px' }
+        ],
+        [
+            { label: 'Shift', code: 'ShiftLeft', w: '56px' },
+            { label: 'Z', code: 'KeyZ', w: '24px' }, { label: 'X', code: 'KeyX', w: '24px' }, { label: 'C', code: 'KeyC', w: '24px' },
+            { label: 'V', code: 'KeyV', w: '24px' }, { label: 'B', code: 'KeyB', w: '24px' }, { label: 'N', code: 'KeyN', w: '24px' },
+            { label: 'M', code: 'KeyM', w: '24px' }, { label: ',', code: 'Comma', w: '24px' }, { label: '.', code: 'Period', w: '24px' },
+            { label: '/', code: 'Slash', w: '24px' }, { label: 'Shift', code: 'ShiftRight', w: '56px' }
+        ],
+        [
+            { label: 'Ctrl', code: 'ControlLeft', w: '32px' },
+            { label: 'Win', code: 'MetaLeft', w: '32px' },
+            { label: 'Alt', code: 'AltLeft', w: '32px' },
+            { label: 'Space', code: 'Space', w: '140px' },
+            { label: 'Alt', code: 'AltRight', w: '32px' },
+            { label: 'Fn', code: 'Fn', w: '32px' },
+            { label: 'Ctrl', code: 'ControlRight', w: '32px' }
+        ]
+    ];
+
+    const keyElementsMap = {};
+    const keyCounts = {};
+    let totalKeyPressCount = 0;
+    let mouseClickCount = 0;
+    let keyTimestamps = [];
+    let lastHand = 'right';
+
+    function updateKPS() {
+        const now = Date.now();
+        keyTimestamps = keyTimestamps.filter(time => now - time < 1000);
+        kpsDisplay.textContent = `${keyTimestamps.length.toFixed(1)} KPS`;
+    }
+
+    if (window.bongoKpsInterval) clearInterval(window.bongoKpsInterval);
+    window.bongoKpsInterval = setInterval(updateKPS, 100);
+
+    keyboardRows.forEach(rowKeys => {
+        const rowDiv = document.createElement('div');
+        rowDiv.style.display = 'flex';
+        rowDiv.style.gap = '3px';
+        rowDiv.style.justifyContent = 'center';
+       
+        rowKeys.forEach(keyInfo => {
+            keyCounts[keyInfo.code] = 0;
+           
+            const keyEl = document.createElement('div');
+            keyEl.style.width = keyInfo.w;
+            keyEl.style.height = '34px';
+            keyEl.style.background = '#27272a';
+            keyEl.style.border = '1px solid #3f3f46';
+            keyEl.style.borderRadius = '5px';
+            keyEl.style.color = '#fff';
+            keyEl.style.display = 'flex';
+            keyEl.style.flexDirection = 'column';
+            keyEl.style.alignItems = 'center';
+            keyEl.style.justifyContent = 'center';
+            keyEl.style.fontSize = '10px';
+            keyEl.style.fontWeight = 'bold';
+            keyEl.style.boxShadow = '0 2px 0 #18181b';
+            keyEl.style.transition = '0.05s ease';
+            keyEl.style.overflow = 'hidden';
+           
+            keyEl.innerHTML = `<span style="font-size: 9px; line-height: 1;">${keyInfo.label}</span><span class="count-badge" style="font-size: 8px; color: #a1a1aa; font-weight: normal; margin-top: 2px;">0</span>`;
+            rowDiv.appendChild(keyEl);
+            keyElementsMap[keyInfo.code.toLowerCase()] = { el: keyEl, code: keyInfo.code };
+        });
+        kbContainer.appendChild(rowDiv);
+    });
+
+    // 키보드 입력 이벤트
+    window.addEventListener('keydown', function(event) {
+        if (event.repeat) return;
+
+        keyTimestamps.push(Date.now());
+        totalKeyPressCount++;
+        updateKPS();
+
+        countDisplay.textContent = `총 타수: ${totalKeyPressCount}`;
+
+        let keyName = event.key === ' ' ? 'Space' : event.key;
+        if (event.code.startsWith('Digit')) keyName = event.code.replace('Digit', '');
+        keyDisplay.textContent = `입력: [ ${keyName.toUpperCase()} ]`;
+
+        let targetObj = keyElementsMap[event.code.toLowerCase()];
+        if (!targetObj && event.key === ' ') {
+            targetObj = Object.values(keyElementsMap).find(k => k.code === 'Space');
+        }
+
+        if (targetObj && targetObj.code) {
+            const realCode = targetObj.code;
+            keyCounts[realCode] = (keyCounts[realCode] || 0) + 1;
+           
+            const targetEl = targetObj.el;
+            if (targetEl) {
+                targetEl.style.background = '#ffb8b8';
+                targetEl.style.color = '#000';
+                targetEl.style.transform = 'translateY(2px)';
+                targetEl.style.boxShadow = '0 0 0 #18181b';
+               
+                const badge = targetEl.querySelector('.count-badge');
+                if (badge) {
+                    badge.textContent = keyCounts[realCode];
+                    badge.style.color = '#000';
+                }
+            }
+        }
+
+        const pawLeft = document.getElementById('paw-left');
+        const pawRight = document.getElementById('paw-right');
+        const leftEye = document.getElementById('left-eye');
+        const rightEye = document.getElementById('right-eye');
+
+        if (lastHand === 'right') {
+            if (pawLeft) pawLeft.style.display = 'block';
+            if (pawRight) pawRight.style.display = 'none';
+            if (leftEye) leftEye.setAttribute('cy', '112');
+            if (rightEye) rightEye.setAttribute('cy', '107');
+            lastHand = 'left';
+        } else {
+            if (pawLeft) pawLeft.style.display = 'none';
+            if (pawRight) pawRight.style.display = 'block';
+            if (leftEye) leftEye.setAttribute('cy', '107');
+            if (rightEye) rightEye.setAttribute('cy', '112');
+            lastHand = 'right';
+        }
+    }, true);
+
+    window.addEventListener('keyup', function(event) {
+        let targetObj = keyElementsMap[event.code.toLowerCase()];
+        if (!targetObj && event.key === ' ') {
+            targetObj = Object.values(keyElementsMap).find(k => k.code === 'Space');
+        }
+
+        if (targetObj && targetObj.el) {
+            targetObj.el.style.background = '#27272a';
+            targetObj.el.style.color = '#fff';
+            targetObj.el.style.transform = 'translateY(0)';
+            targetObj.el.style.boxShadow = '0 2px 0 #18181b';
+           
+            const badge = targetObj.el.querySelector('.count-badge');
+            if (badge) {
+                badge.style.color = '#a1a1aa';
+            }
+        }
+
+        const pawLeft = document.getElementById('paw-left');
+        const pawRight = document.getElementById('paw-right');
+        const leftEye = document.getElementById('left-eye');
+        const rightEye = document.getElementById('right-eye');
+
+        if (pawLeft) pawLeft.style.display = 'none';
+        if (pawRight) pawRight.style.display = 'none';
+        if (leftEye) leftEye.setAttribute('cy', '110');
+        if (rightEye) rightEye.setAttribute('cy', '110');
+    }, true);
+
+    // 마우스 클릭 이벤트 (마우스 그림 클릭 시 살짝 눌리는 애니메이션)
+    window.addEventListener('mousedown', function(event) {
+        mouseClickCount++;
+        mouseClickDisplay.textContent = `마우스: ${mouseClickCount}회`;
+       
+        let btnName = event.button === 2 ? '우클릭' : (event.button === 1 ? '휠클릭' : '좌클릭');
+        keyDisplay.textContent = `입력: [ ${btnName} ]`;
+
+        const mouseObj = document.getElementById('mouse-obj');
+        if (mouseObj) {
+            mouseObj.style.transform = 'translate(0, 3px) scale(0.95)';
+        }
+    }, true);
+
+    window.addEventListener('mouseup', function(event) {
+        const mouseObj = document.getElementById('mouse-obj');
+        if (mouseObj) {
+            mouseObj.style.transform = 'translate(0, 0) scale(1)';
+        }
+    }, true);
+
+    console.log('얼굴 크기를 조금 더 줄이고 완벽한 반원형 돔 모양으로 적용된 봉고캣 위젯이 장착되었습니다!');
+})();
