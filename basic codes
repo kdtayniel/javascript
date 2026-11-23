@@ -1,0 +1,39 @@
+// 1. 콘솔 출력과 변수 선언
+// const는 재할당이 불가능한 상수, let은 재할당이 가능한 변수입니다.
+const siteName = "Browser Console";
+let visitCount = 1;
+
+console.log(`안녕하세요! ${siteName}에 오신 것을 환영합니다.`);
+console.info("방문 횟수:", visitCount);
+
+// 2. 배열과 객체 다루기
+// 배열은 순서가 있는 목록, 객체는 키-값 쌍으로 이루어진 데이터입니다.
+const fruits = ["사과", "바나나", "포도"];
+const user = {
+  name: "지민",
+  role: "학습자",
+  isActive: true
+};
+
+// 배열을 표 형태로 깔끔하게 출력합니다.
+console.table(fruits);
+console.log(`${user.name} (${user.role})의 활성 상태: ${user.isActive}`);
+
+// 3. 함수와 조건문 / 반복문
+function checkStock(itemList) {
+  for (let i = 0; i < itemList.length; i++) {
+    const item = itemList[i];
+    if (item === "바나나") {
+      console.warn(`${item} 재고가 적습니다!`);
+    } else {
+      console.log(`${item} 준비 완료`);
+    }
+  }
+}
+
+checkStock(fruits);
+
+// 4. 현재 페이지 DOM(문서 객체 모델) 간단 조회
+// 현재 열려 있는 웹페이지의 제목과 주소를 콘솔에서 확인합니다.
+console.log("현재 페이지 제목:", document.title);
+console.log("현재 페이지 URL:", location.href);
