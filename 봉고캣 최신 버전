@@ -56,6 +56,10 @@
       border-color: #38bdf8 !important;
       box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55) !important;
     }
+    #bongo-cat-widget.dev-mode-yejun {
+      border-color: #22d3ee !important;
+      box-shadow: 0 12px 35px rgba(34, 211, 238, 0.6) !important;
+    }
     .bongo-top-bar {
       display: flex !important;
       flex-direction: row !important;
@@ -129,6 +133,9 @@
       justify-content: center !important;
       text-align: left !important;
       padding: 4px !important;
+    }
+    #bongo-cat-widget.dev-mode-yejun #bongo-dev-art {
+      color: #A5F3FC !important;
     }
     #bongo-cat-widget.mini-mode #bongo-dev-art {
       font-size: 5.5px !important;
@@ -204,6 +211,10 @@
     }
     #bongo-cat-widget.dev-mode .bongo-key.active {
       background: #38bdf8 !important;
+      color: #000000 !important;
+    }
+    #bongo-cat-widget.dev-mode-yejun .bongo-key.active {
+      background: #A5F3FC !important;
       color: #000000 !important;
     }
     .bongo-key-label {
@@ -362,24 +373,44 @@
     '</svg>';
   catBox.appendChild(catSvgWrapper);
 
+  const DEV_ARTS = {
+    1: [
+      "        . · ˜ ° ≈ ~ ~ ≈ ° ˜ · .",
+      "      ╱  ╱   /   |   \\   \\  ╲",
+      "    ╱  ╱   /     |     \\   \\  ╲",
+      "  │  ╱   /   ╭──┴──╮   \\   \\  │",
+      "  │ ╱   /  ╔═══╗ ╔═══╗  \\   \\ │",
+      "  │ │  │   ║ ● ║═║ ● ║   │  │ │",
+      "  ╰─│  │   ╚═══╝ ╚═══╝   │  │─╯",
+      "   ╲│  │        ▽        │  │╱",
+      "    ╲  │     ╰──◡──╯     │  ╱",
+      "     ╲ ╰──. ＿ ＿ ＿ .──╯ ╱",
+      "      ╲   │           │   ╱",
+      "       ╰───┬─┴───┴─┬───╯",
+      "         ╱│  ◈   ◇  │╲",
+      "        ╱ │  ◇   ◈  │ ╲"
+    ].join('\n'),
+    2: [
+      "        . · ˜ ° ≈ ~ ~ ≈ ° ˜ · .",
+      "      ╱  ╱   /   |   \\   \\  ╲",
+      "    ╱  ╱   /     |     \\   \\  ╲",
+      "  │  ╱   /   ╭───┴───╮   \\   \\  │",
+      "  │ ╱   /   ╭──╮   ╭──╮   \\   \\ │",
+      "  │ │  │   │ ● │───│ ● │   │  │ │",
+      "  ╰─│  │   ╰──╯   ╰──╯   │  │─╯",
+      "   ╲│  │        ▽        │  │╱",
+      "    ╲  │     ╰───◡───╯     │  ╱",
+      "     ╲ ╰──.  ＿  ＿  ＿  .──╯ ╱",
+      "      ╲   │               │   ╱",
+      "       ╰───┬─┴───────┴─┬───╯",
+      "         ╱│  ◈       ◇  │╲",
+      "        ╱ │  ◇       ◈  │ ╲"
+    ].join('\n')
+  };
+
   const devArtPre = document.createElement('pre');
   devArtPre.id = 'bongo-dev-art';
-  devArtPre.textContent = [
-    "        . · ˜ ° ≈ ~ ~ ≈ ° ˜ · .",
-    "      ╱  ╱   /   |   \\   \\  ╲",
-    "    ╱  ╱   /     |     \\   \\  ╲",
-    "  │  ╱   /   ╭──┴──╮   \\   \\  │",
-    "  │ ╱   /  ╔═══╗ ╔═══╗  \\   \\ │",
-    "  │ │  │   ║ ● ║═║ ● ║   │  │ │",
-    "  ╰─│  │   ╚═══╝ ╚═══╝   │  │─╯",
-    "   ╲│  │        ▽        │  │╱",
-    "    ╲  │     ╰──◡──╯     │  ╱",
-    "     ╲ ╰──. ＿ ＿ ＿ .──╯ ╱",
-    "      ╲   │           │   ╱",
-    "       ╰───┬─┴───┴─┬───╯",
-    "         ╱│  ◈   ◇  │╲",
-    "        ╱ │  ◇   ◈  │ ╲"
-  ].join('\n');
+  devArtPre.textContent = DEV_ARTS[1];
   catBox.appendChild(devArtPre);
 
   const infoBox = document.createElement('div');
@@ -483,7 +514,7 @@
   let keyTimestamps = [];
   let lastHand = 'right';
   let isGoldenCat = false;
-  let isDevMode = false;
+  let devModeType = 0; // 0: 꺼짐, 1: 고태윤 개발자, 2: 권예준 개발자
   let isSkyMode = false;
   let isMiniMode = false;
   let savedPos = null;
@@ -542,7 +573,7 @@
       m: mouseClickCount,
       k: compactKeys,
       g: isGoldenCat ? 1 : 0,
-      d: isDevMode ? 1 : 0,
+      d: devModeType,
       b: isSkyMode ? 1 : 0
     };
     return 'BONGO1:' + btoa(JSON.stringify(payload));
@@ -554,12 +585,15 @@
     if (!trimmed.startsWith('BONGO1:')) return null;
     const parsed = JSON.parse(atob(trimmed.slice(7)));
     if (!parsed || typeof parsed !== 'object') return null;
+    let parsedDev = 0;
+    if (parsed.d === 2) parsedDev = 2;
+    else if (parsed.d === 1 || parsed.d === true) parsedDev = 1;
     return {
       totalKeyPressCount: Number.isFinite(parsed.t) && parsed.t >= 0 ? Math.floor(parsed.t) : 0,
       mouseClickCount: Number.isFinite(parsed.m) && parsed.m >= 0 ? Math.floor(parsed.m) : 0,
       keyCounts: parsed.k && typeof parsed.k === 'object' ? parsed.k : {},
       isGoldenCat: Boolean(parsed.g),
-      isDevMode: Boolean(parsed.d),
+      devModeType: parsedDev,
       isSkyMode: Boolean(parsed.b)
     };
   }
@@ -571,7 +605,7 @@
         mouseClickCount: mouseClickCount,
         keyCounts: keyCounts,
         isGoldenCat: isGoldenCat,
-        isDevMode: isDevMode,
+        devModeType: devModeType,
         isSkyMode: isSkyMode,
         isMiniMode: isMiniMode,
         pos: savedPos
@@ -625,13 +659,15 @@
       kpsDisplay.style.color = '#51cf66';
     }
 
-    if (isDevMode) {
+    if (devModeType > 0) {
       container.classList.add('dev-mode');
+      container.classList.toggle('dev-mode-yejun', devModeType === 2);
+      devArtPre.textContent = DEV_ARTS[devModeType] || DEV_ARTS[1];
       catSvgWrapper.style.setProperty('display', 'none', 'important');
       devArtPre.style.setProperty('display', 'flex', 'important');
-      keyDisplay.style.color = isSkyMode ? '#0f172a' : '#38bdf8';
+      keyDisplay.style.color = isSkyMode ? '#0f172a' : (devModeType === 2 ? '#A5F3FC' : '#38bdf8');
     } else {
-      container.classList.remove('dev-mode');
+      container.classList.remove('dev-mode', 'dev-mode-yejun');
       devArtPre.style.setProperty('display', 'none', 'important');
       catSvgWrapper.style.setProperty('display', 'block', 'important');
       keyDisplay.style.color = isSkyMode ? '#0f172a' : (isGoldenCat ? '#FFD700' : '#ffb8b8');
@@ -654,7 +690,9 @@
       } else if (data.isGoldenCat && !isSkyMode) {
         isGoldenCat = true;
       }
-      isDevMode = isDevMode || data.isDevMode;
+      if (data.devModeType > 0) {
+        devModeType = data.devModeType;
+      }
     } else {
       totalKeyPressCount = data.totalKeyPressCount;
       mouseClickCount = data.mouseClickCount;
@@ -664,7 +702,7 @@
       });
       isSkyMode = data.isSkyMode;
       isGoldenCat = !isSkyMode && data.isGoldenCat;
-      isDevMode = data.isDevMode;
+      devModeType = data.devModeType;
     }
 
     applyCountsToUI();
@@ -686,12 +724,16 @@
         applyPosition(parsed.pos.left, parsed.pos.top);
       }
 
+      let restoredDev = 0;
+      if (parsed.devModeType === 2) restoredDev = 2;
+      else if (parsed.devModeType === 1 || parsed.isDevMode) restoredDev = 1;
+
       applyDecodedData({
         totalKeyPressCount: Number.isFinite(parsed.totalKeyPressCount) ? Math.floor(parsed.totalKeyPressCount) : 0,
         mouseClickCount: Number.isFinite(parsed.mouseClickCount) ? Math.floor(parsed.mouseClickCount) : 0,
         keyCounts: parsed.keyCounts || {},
         isGoldenCat: Boolean(parsed.isGoldenCat),
-        isDevMode: Boolean(parsed.isDevMode),
+        devModeType: restoredDev,
         isSkyMode: Boolean(parsed.isSkyMode)
       }, false);
       return true;
@@ -718,7 +760,7 @@
     isGoldenCat = !isGoldenCat;
     if (isGoldenCat) isSkyMode = false;
     applyVisualModes();
-    if (!isDevMode) {
+    if (devModeType === 0) {
       keyDisplay.textContent = isGoldenCat ? '★ 황금 고양이! ★' : '입력: [ 일반 모드 ]';
     }
     saveState();
@@ -728,16 +770,22 @@
     isSkyMode = !isSkyMode;
     if (isSkyMode) isGoldenCat = false;
     applyVisualModes();
-    if (!isDevMode) {
+    if (devModeType === 0) {
       keyDisplay.textContent = isSkyMode ? '★ 스카이 테마! ★' : '입력: [ 일반 모드 ]';
     }
     saveState();
   }
 
-  function toggleDeveloperMode() {
-    isDevMode = !isDevMode;
+  function toggleDeveloperMode(targetType) {
+    devModeType = (devModeType === targetType) ? 0 : targetType;
     applyVisualModes();
-    keyDisplay.textContent = isDevMode ? '★ 개발자 모드! ★' : '입력: [ 고양이 복귀 ]';
+    if (devModeType === 1) {
+      keyDisplay.textContent = '★ 개발자 모드! ★';
+    } else if (devModeType === 2) {
+      keyDisplay.textContent = '★ 권예준 개발자! ★';
+    } else {
+      keyDisplay.textContent = '입력: [ 고양이 복귀 ]';
+    }
     saveState();
   }
 
@@ -894,7 +942,7 @@
     mouseClickCount = 0;
     keyTimestamps = [];
     isGoldenCat = false;
-    isDevMode = false;
+    devModeType = 0;
     isSkyMode = false;
     Object.keys(keyCounts).forEach(function(code) {
       keyCounts[code] = 0;
@@ -944,7 +992,12 @@
     if (codeBuffer.endsWith('rhxodbs roqkfwk') || charBuffer.endsWith('고태윤 개발자')) {
       codeBuffer = '';
       charBuffer = '';
-      toggleDeveloperMode();
+      toggleDeveloperMode(1);
+    }
+    if (codeBuffer.endsWith('rnjsdpwns roqkfwk') || charBuffer.endsWith('권예준 개발자')) {
+      codeBuffer = '';
+      charBuffer = '';
+      toggleDeveloperMode(2);
     }
     if (codeBuffer.endsWith('rnjsdpwns1230') || charBuffer.endsWith('권예준1230')) {
       codeBuffer = '';
@@ -1030,5 +1083,5 @@
   document.addEventListener('mousedown', window._bongoMouseDown, true);
   document.addEventListener('mouseup', window._bongoMouseUp, true);
 
-  console.log('봉고캣 위젯 (권예준1230 스카이 전체 테마 포함) 실행 완료!');
+  console.log('봉고캣 위젯 (권예준 개발자 아스키 아트 모드 포함) 실행 완료!');
 })();
