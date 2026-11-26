@@ -1,33 +1,10 @@
 (function() {
   'use strict';
 
-  const STORAGE_KEY = 'bongo_cat_saved_data_v1';
-
-  function loadLocal() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function saveLocal() {
-    try {
-      const data = {
-        t: totalKeyPressCount,
-        m: mouseClickCount,
-        k: keyCounts,
-        g: isGoldenCat
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {}
-  }
+  const STORAGE_KEY = 'bongo_cat_widget_state_v1';
 
   const existing = document.getElementById('bongo-cat-widget');
   if (existing) existing.remove();
-
   const oldStyle = document.getElementById('bongo-cat-style');
   if (oldStyle) oldStyle.remove();
 
@@ -62,6 +39,10 @@
       border-color: #FFD700 !important;
       box-shadow: 0 12px 35px rgba(255, 215, 0, 0.55) !important;
     }
+    #bongo-cat-widget.dev-mode {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55) !important;
+    }
     .bongo-cat-box {
       width: 360px !important;
       height: 160px !important;
@@ -71,6 +52,24 @@
       overflow: hidden !important;
       position: relative !important;
       padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    #bongo-dev-art {
+      display: none;
+      width: 100% !important;
+      height: 100% !important;
+      background: #0f172a !important;
+      color: #38bdf8 !important;
+      font-family: 'Consolas', 'Courier New', monospace !important;
+      font-size: 9px !important;
+      line-height: 1.08 !important;
+      white-space: pre !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: left !important;
+      padding: 4px !important;
     }
     .bongo-info-bar {
       display: flex !important;
@@ -122,6 +121,10 @@
       background: #FFD700 !important;
       color: #000000 !important;
     }
+    #bongo-cat-widget.dev-mode .bongo-key.active {
+      background: #38bdf8 !important;
+      color: #000000 !important;
+    }
     .bongo-key-label {
       display: block !important;
       font-size: 9px !important;
@@ -139,31 +142,42 @@
     .bongo-key.active .bongo-key-count {
       color: #000000 !important;
     }
-    .bongo-btn-bar {
+    .bongo-ctrl-bar {
       display: flex !important;
       flex-direction: row !important;
-      gap: 6px !important;
+      justify-content: space-between !important;
+      align-items: center !important;
       width: 100% !important;
+      padding-top: 6px !important;
+      border-top: 1px solid #27272a !important;
+    }
+    .bongo-save-status {
+      color: #a1a1aa !important;
+      font-size: 10px !important;
+    }
+    .bongo-ctrl-btns {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 4px !important;
     }
     .bongo-ctrl-btn {
-      flex: 1 !important;
       background: #27272a !important;
       color: #e4e4e7 !important;
       border: 1px solid #3f3f46 !important;
-      border-radius: 6px !important;
-      font-size: 11px !important;
+      border-radius: 4px !important;
+      padding: 3px 7px !important;
+      font-size: 10px !important;
       font-weight: bold !important;
-      padding: 6px 0 !important;
       cursor: pointer !important;
-      text-align: center !important;
-      transition: background-color 0.15s ease !important;
+      transition: background-color 0.15s, border-color 0.15s !important;
     }
     .bongo-ctrl-btn:hover {
       background: #3f3f46 !important;
+      border-color: #71717a !important;
     }
     .bongo-ctrl-btn.danger:hover {
-      background: #dc2626 !important;
-      border-color: #dc2626 !important;
+      background: #7f1d1d !important;
+      border-color: #ef4444 !important;
       color: #ffffff !important;
     }
   `;
@@ -177,51 +191,64 @@
   catBox.className = 'bongo-cat-box';
   container.appendChild(catBox);
 
-  catBox.innerHTML = '<svg viewBox="0 0 400 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">' +
+  const catSvgWrapper = document.createElement('div');
+  catSvgWrapper.id = 'bongo-cat-svg-wrap';
+  catSvgWrapper.style.cssText = 'width: 100% !important; height: 100% !important; display: block !important;';
+  catSvgWrapper.innerHTML = '<svg viewBox="0 0 400 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">' +
     '<defs>' +
-      '<linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-        '<stop offset="0%" stop-color="#FFF099"/>' +
-        '<stop offset="45%" stop-color="#FFD700"/>' +
-        '<stop offset="100%" stop-color="#D97706"/>' +
-      '</linearGradient>' +
+    '<linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+    '<stop offset="0%" stop-color="#FFF099"/>' +
+    '<stop offset="45%" stop-color="#FFD700"/>' +
+    '<stop offset="100%" stop-color="#D97706"/>' +
+    '</linearGradient>' +
     '</defs>' +
     '<rect id="cat-bg" width="400" height="200" fill="white" style="transition: fill 0.3s;"/>' +
     '<line x1="0" y1="140" x2="400" y2="140" stroke="black" stroke-width="6"/>' +
     '<rect x="25" y="115" width="105" height="55" rx="6" fill="#d4d4d8" stroke="black" stroke-width="3"/>' +
     '<g id="mouse-obj" style="transition: 0.05s; transform-origin: 70px 133px;">' +
-      '<g transform="rotate(180, 70, 133)">' +
-        '<rect x="55" y="110" width="30" height="46" rx="15" fill="#f4f4f5" stroke="black" stroke-width="3"/>' +
-        '<line x1="70" y1="110" x2="70" y2="130" stroke="black" stroke-width="2"/>' +
-      '</g>' +
+    '<g transform="rotate(180, 70, 133)">' +
+    '<rect x="55" y="110" width="30" height="46" rx="15" fill="#f4f4f5" stroke="black" stroke-width="3"/>' +
+    '<line x1="70" y1="110" x2="70" y2="130" stroke="black" stroke-width="2"/>' +
+    '</g>' +
     '</g>' +
     '<g transform="translate(15, 0)">' +
-      '<path id="cat-ear-left" d="M 153 52 L 140 16 L 175 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
-      '<path id="cat-ear-right" d="M 247 52 L 260 16 L 225 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
-      '<path id="cat-head" d="M 150 140 L 150 90 A 50 50 0 0 1 250 90 L 250 140 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
-      '<g id="gold-sparkles" style="display: none;">' +
-        '<path d="M 120 45 L 123 53 L 131 56 L 123 59 L 120 67 L 117 59 L 109 56 L 117 53 Z" fill="#F59E0B"/>' +
-        '<path d="M 280 35 L 282 41 L 288 43 L 282 45 L 280 51 L 278 45 L 272 43 L 278 41 Z" fill="#F59E0B"/>' +
-        '<circle cx="135" cy="80" r="3" fill="#FBBF24"/>' +
-        '<circle cx="270" cy="75" r="2.5" fill="#FBBF24"/>' +
-      '</g>' +
-      '<circle id="left-eye" cx="178" cy="110" r="5" fill="black"/>' +
-      '<circle id="right-eye" cx="222" cy="110" r="5" fill="black"/>' +
-      '<path id="cat-mouth" d="M 195 118 Q 200 123 205 118" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/>' +
-      '<ellipse id="paw-left" cx="145" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />' +
-      '<ellipse id="paw-right" cx="255" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />' +
+    '<path id="cat-ear-left" d="M 153 52 L 140 16 L 175 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
+    '<path id="cat-ear-right" d="M 247 52 L 260 16 L 225 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
+    '<path id="cat-head" d="M 150 140 L 150 90 A 50 50 0 0 1 250 90 L 250 140 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
+    '<g id="gold-sparkles" style="display: none;">' +
+    '<path d="M 120 45 L 123 53 L 131 56 L 123 59 L 120 67 L 117 59 L 109 56 L 117 53 Z" fill="#F59E0B"/>' +
+    '<path d="M 280 35 L 282 41 L 288 43 L 282 45 L 280 51 L 278 45 L 272 43 L 278 41 Z" fill="#F59E0B"/>' +
+    '<circle cx="135" cy="80" r="3" fill="#FBBF24"/>' +
+    '<circle cx="270" cy="75" r="2.5" fill="#FBBF24"/>' +
     '</g>' +
-  '</svg>';
+    '<circle id="left-eye" cx="178" cy="110" r="5" fill="black"/>' +
+    '<circle id="right-eye" cx="222" cy="110" r="5" fill="black"/>' +
+    '<path id="cat-mouth" d="M 195 118 Q 200 123 205 118" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/>' +
+    '<ellipse id="paw-left" cx="145" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />' +
+    '<ellipse id="paw-right" cx="255" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />' +
+    '</g>' +
+    '</svg>';
+  catBox.appendChild(catSvgWrapper);
 
-  const saved = loadLocal();
-  const keyElementsMap = {};
-  const keyCounts = (saved && saved.k && typeof saved.k === 'object') ? saved.k : {};
-  let totalKeyPressCount = (saved && typeof saved.t === 'number') ? saved.t : 0;
-  let mouseClickCount = (saved && typeof saved.m === 'number') ? saved.m : 0;
-  let isGoldenCat = Boolean(saved && saved.g);
-  let keyTimestamps = [];
-  let lastHand = 'right';
-  let codeBuffer = '';
-  let charBuffer = '';
+  const devArtPre = document.createElement('pre');
+  devArtPre.id = 'bongo-dev-art';
+  devArtPre.textContent = [
+    "        . · ˜ ° ≈ ~ ~ ≈ ° ˜ · .",
+    "      ╱  ╱   /   |   \\   \\  ╲",
+    "    ╱  ╱   /     |     \\   \\  ╲",
+    "  │  ╱   /   ╭──┴──╮   \\   \\  │",
+    "  │ ╱   /  ╔═══╗ ╔═══╗  \\   \\ │",
+    "  │ │  │   ║ ● ║═║ ● ║   │  │ │",
+    "  ╰─│  │   ╚═══╝ ╚═══╝   │  │─╯",
+    "   ╲│  │        ▽        │  │╱",
+    "    ╲  │     ╰──◡──╯     │  ╱",
+    "     ╲ ╰──. ＿ ＿ ＿ .──╯ ╱",
+    "      ╲   │           │   ╱",
+    "       ╰───┬─┴───┴─┬───╯",
+    "         ╱│  ◈   ◇  │╲",
+    "        ╱ │  ◇   ◈  │ ╲"
+  ].join('\n');
+  catBox.appendChild(devArtPre);
 
   const infoBox = document.createElement('div');
   infoBox.className = 'bongo-info-bar';
@@ -234,12 +261,12 @@
 
   const mouseClickDisplay = document.createElement('div');
   mouseClickDisplay.style.color = '#38bdf8';
-  mouseClickDisplay.textContent = '마우스: ' + mouseClickCount + '회';
+  mouseClickDisplay.textContent = '마우스: 0회';
   infoBox.appendChild(mouseClickDisplay);
 
   const countDisplay = document.createElement('div');
   countDisplay.style.color = '#74c0fc';
-  countDisplay.textContent = '총 타수: ' + totalKeyPressCount;
+  countDisplay.textContent = '총 타수: 0';
   infoBox.appendChild(countDisplay);
 
   const kpsDisplay = document.createElement('div');
@@ -251,41 +278,224 @@
   kbContainer.className = 'bongo-kb-container';
   container.appendChild(kbContainer);
 
-  const bsChar = String.fromCharCode(92);
+  // 클립보드 복사 / 불러오기 / 초기화 컨트롤 바
+  const ctrlBar = document.createElement('div');
+  ctrlBar.className = 'bongo-ctrl-bar';
+  container.appendChild(ctrlBar);
 
+  const saveStatus = document.createElement('span');
+  saveStatus.className = 'bongo-save-status';
+  saveStatus.textContent = '자동 저장 켜짐';
+  ctrlBar.appendChild(saveStatus);
+
+  const ctrlBtns = document.createElement('div');
+  ctrlBtns.className = 'bongo-ctrl-btns';
+  ctrlBar.appendChild(ctrlBtns);
+
+  const copyBtn = document.createElement('button');
+  copyBtn.type = 'button';
+  copyBtn.className = 'bongo-ctrl-btn';
+  copyBtn.textContent = '복사';
+  ctrlBtns.appendChild(copyBtn);
+
+  const pasteBtn = document.createElement('button');
+  pasteBtn.type = 'button';
+  pasteBtn.className = 'bongo-ctrl-btn';
+  pasteBtn.textContent = '불러오기';
+  ctrlBtns.appendChild(pasteBtn);
+
+  const resetBtn = document.createElement('button');
+  resetBtn.type = 'button';
+  resetBtn.className = 'bongo-ctrl-btn danger';
+  resetBtn.textContent = '초기화';
+  ctrlBtns.appendChild(resetBtn);
+
+  const bsChar = String.fromCharCode(92);
   const keyboardRows = [
-    [ { label: '`', code: 'Backquote', w: '24px' }, { label: '1', code: 'Digit1', w: '24px' }, { label: '2', code: 'Digit2', w: '24px' }, { label: '3', code: 'Digit3', w: '24px' }, { label: '4', code: 'Digit4', w: '24px' }, { label: '5', code: 'Digit5', w: '24px' }, { label: '6', code: 'Digit6', w: '24px' }, { label: '7', code: 'Digit7', w: '24px' }, { label: '8', code: 'Digit8', w: '24px' }, { label: '9', code: 'Digit9', w: '24px' }, { label: '0', code: 'Digit0', w: '24px' }, { label: '-', code: 'Minus', w: '24px' }, { label: '=', code: 'Equal', w: '24px' }, { label: 'Bksp', code: 'Backspace', w: '44px' } ],
-    [ { label: 'Tab', code: 'Tab', w: '38px' }, { label: 'Q', code: 'KeyQ', w: '24px' }, { label: 'W', code: 'KeyW', w: '24px' }, { label: 'E', code: 'KeyE', w: '24px' }, { label: 'R', code: 'KeyR', w: '24px' }, { label: 'T', code: 'KeyT', w: '24px' }, { label: 'Y', code: 'KeyY', w: '24px' }, { label: 'U', code: 'KeyU', w: '24px' }, { label: 'I', code: 'KeyI', w: '24px' }, { label: 'O', code: 'KeyO', w: '24px' }, { label: 'P', code: 'KeyP', w: '24px' }, { label: '[', code: 'BracketLeft', w: '24px' }, { label: ']', code: 'BracketRight', w: '24px' }, { label: bsChar, code: 'Backslash', w: '34px' } ],
-    [ { label: 'Caps', code: 'CapsLock', w: '44px' }, { label: 'A', code: 'KeyA', w: '24px' }, { label: 'S', code: 'KeyS', w: '24px' }, { label: 'D', code: 'KeyD', w: '24px' }, { label: 'F', code: 'KeyF', w: '24px' }, { label: 'G', code: 'KeyG', w: '24px' }, { label: 'H', code: 'KeyH', w: '24px' }, { label: 'J', code: 'KeyJ', w: '24px' }, { label: 'K', code: 'KeyK', w: '24px' }, { label: 'L', code: 'KeyL', w: '24px' }, { label: ';', code: 'Semicolon', w: '24px' }, { label: "'", code: 'Quote', w: '24px' }, { label: 'Enter', code: 'Enter', w: '50px' } ],
-    [ { label: 'Shift', code: 'ShiftLeft', w: '56px' }, { label: 'Z', code: 'KeyZ', w: '24px' }, { label: 'X', code: 'KeyX', w: '24px' }, { label: 'C', code: 'KeyC', w: '24px' }, { label: 'V', code: 'KeyV', w: '24px' }, { label: 'B', code: 'KeyB', w: '24px' }, { label: 'N', code: 'KeyN', w: '24px' }, { label: 'M', code: 'KeyM', w: '24px' }, { label: ',', code: 'Comma', w: '24px' }, { label: '.', code: 'Period', w: '24px' }, { label: '/', code: 'Slash', w: '24px' }, { label: 'Shift', code: 'ShiftRight', w: '56px' } ],
-    [ { label: 'Ctrl', code: 'ControlLeft', w: '32px' }, { label: 'Win', code: 'MetaLeft', w: '32px' }, { label: 'Alt', code: 'AltLeft', w: '32px' }, { label: 'Space', code: 'Space', w: '140px' }, { label: 'Alt', code: 'AltRight', w: '32px' }, { label: 'Fn', code: 'Fn', w: '32px' }, { label: 'Ctrl', code: 'ControlRight', w: '32px' } ]
+    [
+      { label: '`', code: 'Backquote', w: '24px' }, { label: '1', code: 'Digit1', w: '24px' }, { label: '2', code: 'Digit2', w: '24px' }, { label: '3', code: 'Digit3', w: '24px' }, { label: '4', code: 'Digit4', w: '24px' }, { label: '5', code: 'Digit5', w: '24px' }, { label: '6', code: 'Digit6', w: '24px' }, { label: '7', code: 'Digit7', w: '24px' }, { label: '8', code: 'Digit8', w: '24px' }, { label: '9', code: 'Digit9', w: '24px' }, { label: '0', code: 'Digit0', w: '24px' }, { label: '-', code: 'Minus', w: '24px' }, { label: '=', code: 'Equal', w: '24px' }, { label: 'Bksp', code: 'Backspace', w: '44px' }
+    ],
+    [
+      { label: 'Tab', code: 'Tab', w: '38px' }, { label: 'Q', code: 'KeyQ', w: '24px' }, { label: 'W', code: 'KeyW', w: '24px' }, { label: 'E', code: 'KeyE', w: '24px' }, { label: 'R', code: 'KeyR', w: '24px' }, { label: 'T', code: 'KeyT', w: '24px' }, { label: 'Y', code: 'KeyY', w: '24px' }, { label: 'U', code: 'KeyU', w: '24px' }, { label: 'I', code: 'KeyI', w: '24px' }, { label: 'O', code: 'KeyO', w: '24px' }, { label: 'P', code: 'KeyP', w: '24px' }, { label: '[', code: 'BracketLeft', w: '24px' }, { label: ']', code: 'BracketRight', w: '24px' }, { label: bsChar, code: 'Backslash', w: '34px' }
+    ],
+    [
+      { label: 'Caps', code: 'CapsLock', w: '44px' }, { label: 'A', code: 'KeyA', w: '24px' }, { label: 'S', code: 'KeyS', w: '24px' }, { label: 'D', code: 'KeyD', w: '24px' }, { label: 'F', code: 'KeyF', w: '24px' }, { label: 'G', code: 'KeyG', w: '24px' }, { label: 'H', code: 'KeyH', w: '24px' }, { label: 'J', code: 'KeyJ', w: '24px' }, { label: 'K', code: 'KeyK', w: '24px' }, { label: 'L', code: 'KeyL', w: '24px' }, { label: ';', code: 'Semicolon', w: '24px' }, { label: "'", code: 'Quote', w: '24px' }, { label: 'Enter', code: 'Enter', w: '50px' }
+    ],
+    [
+      { label: 'Shift', code: 'ShiftLeft', w: '56px' }, { label: 'Z', code: 'KeyZ', w: '24px' }, { label: 'X', code: 'KeyX', w: '24px' }, { label: 'C', code: 'KeyC', w: '24px' }, { label: 'V', code: 'KeyV', w: '24px' }, { label: 'B', code: 'KeyB', w: '24px' }, { label: 'N', code: 'KeyN', w: '24px' }, { label: 'M', code: 'KeyM', w: '24px' }, { label: ',', code: 'Comma', w: '24px' }, { label: '.', code: 'Period', w: '24px' }, { label: '/', code: 'Slash', w: '24px' }, { label: 'Shift', code: 'ShiftRight', w: '56px' }
+    ],
+    [
+      { label: 'Ctrl', code: 'ControlLeft', w: '32px' }, { label: 'Win', code: 'MetaLeft', w: '32px' }, { label: 'Alt', code: 'AltLeft', w: '32px' }, { label: 'Space', code: 'Space', w: '140px' }, { label: 'Alt', code: 'AltRight', w: '32px' }, { label: 'Fn', code: 'Fn', w: '32px' }, { label: 'Ctrl', code: 'ControlRight', w: '32px' }
+    ]
   ];
 
   const fallbackKeyMap = {
-    '`': 'Backquote', '~': 'Backquote',
-    '1': 'Digit1', '!': 'Digit1', '2': 'Digit2', '@': 'Digit2', '3': 'Digit3', '#': 'Digit3',
-    '4': 'Digit4', '$': 'Digit4', '5': 'Digit5', '%': 'Digit5', '6': 'Digit6', '^': 'Digit6',
-    '7': 'Digit7', '&': 'Digit7', '8': 'Digit8', '*': 'Digit8', '9': 'Digit9', '(': 'Digit9',
-    '0': 'Digit0', ')': 'Digit0', '-': 'Minus', '_': 'Minus', '=': 'Equal', '+': 'Equal',
-    'q': 'KeyQ', 'ㅂ': 'KeyQ', 'ㅃ': 'KeyQ', 'w': 'KeyW', 'ㅈ': 'KeyW', 'ㅉ': 'KeyW',
-    'e': 'KeyE', 'ㄷ': 'KeyE', 'ㄸ': 'KeyE', 'r': 'KeyR', 'ㄱ': 'KeyR', 'ㄲ': 'KeyR',
-    't': 'KeyT', 'ㅅ': 'KeyT', 'ㅆ': 'KeyT', 'y': 'KeyY', 'ㅛ': 'KeyY',
-    'u': 'KeyU', 'ㅕ': 'KeyU', 'i': 'KeyI', 'ㅑ': 'KeyI',
-    'o': 'KeyO', 'ㅐ': 'KeyO', 'ㅒ': 'KeyO', 'p': 'KeyP', 'ㅔ': 'KeyP', 'ㅖ': 'KeyP',
-    '[': 'BracketLeft', '{': 'BracketLeft', ']': 'BracketRight', '}': 'BracketRight',
-    '|': 'Backslash',
-    'a': 'KeyA', 'ㅁ': 'KeyA', 's': 'KeyS', 'ㄴ': 'KeyS', 'd': 'KeyD', 'ㅇ': 'KeyD',
-    'f': 'KeyF', 'ㄹ': 'KeyF', 'g': 'KeyG', 'ㅎ': 'KeyG', 'h': 'KeyH', 'ㅗ': 'KeyH',
-    'j': 'KeyJ', 'ㅓ': 'KeyJ', 'k': 'KeyK', 'ㅏ': 'KeyK', 'l': 'KeyL', 'ㅣ': 'KeyL',
+    '`': 'Backquote', '~': 'Backquote', '1': 'Digit1', '!': 'Digit1', '2': 'Digit2', '@': 'Digit2', '3': 'Digit3', '#': 'Digit3', '4': 'Digit4', '$': 'Digit4', '5': 'Digit5', '%': 'Digit5', '6': 'Digit6', '^': 'Digit6', '7': 'Digit7', '&': 'Digit7', '8': 'Digit8', '*': 'Digit8', '9': 'Digit9', '(': 'Digit9', '0': 'Digit0', ')': 'Digit0', '-': 'Minus', '_': 'Minus', '=': 'Equal', '+': 'Equal',
+    'q': 'KeyQ', 'ㅂ': 'KeyQ', 'ㅃ': 'KeyQ', 'w': 'KeyW', 'ㅈ': 'KeyW', 'ㅉ': 'KeyW', 'e': 'KeyE', 'ㄷ': 'KeyE', 'ㄸ': 'KeyE', 'r': 'KeyR', 'ㄱ': 'KeyR', 'ㄲ': 'KeyR', 't': 'KeyT', 'ㅅ': 'KeyT', 'ㅆ': 'KeyT', 'y': 'KeyY', 'ㅛ': 'KeyY', 'u': 'KeyU', 'ㅕ': 'KeyU', 'i': 'KeyI', 'ㅑ': 'KeyI', 'o': 'KeyO', 'ㅐ': 'KeyO', 'ㅒ': 'KeyO', 'p': 'KeyP', 'ㅔ': 'KeyP', 'ㅖ': 'KeyP',
+    '[': 'BracketLeft', '{': 'BracketLeft', ']': 'BracketRight', '}': 'BracketRight', '|': 'Backslash',
+    'a': 'KeyA', 'ㅁ': 'KeyA', 's': 'KeyS', 'ㄴ': 'KeyS', 'd': 'KeyD', 'ㅇ': 'KeyD', 'f': 'KeyF', 'ㄹ': 'KeyF', 'g': 'KeyG', 'ㅎ': 'KeyG', 'h': 'KeyH', 'ㅗ': 'KeyH', 'j': 'KeyJ', 'ㅓ': 'KeyJ', 'k': 'KeyK', 'ㅏ': 'KeyK', 'l': 'KeyL', 'ㅣ': 'KeyL',
     ';': 'Semicolon', ':': 'Semicolon', "'": 'Quote', '"': 'Quote',
-    'z': 'KeyZ', 'ㅋ': 'KeyZ', 'x': 'KeyX', 'ㅌ': 'KeyX', 'c': 'KeyC', 'ㅊ': 'KeyC',
-    'v': 'KeyV', 'ㅍ': 'KeyV', 'b': 'KeyB', 'ㅠ': 'KeyB', 'n': 'KeyN', 'ㅜ': 'KeyN',
-    'm': 'KeyM', 'ㅡ': 'KeyM', ',': 'Comma', '<': 'Comma', '.': 'Period', '>': 'Period',
-    '/': 'Slash', '?': 'Slash', ' ': 'Space',
-    'backspace': 'Backspace', 'tab': 'Tab', 'capslock': 'CapsLock', 'enter': 'Enter',
-    'shift': 'ShiftLeft', 'control': 'ControlLeft', 'alt': 'AltLeft', 'meta': 'MetaLeft'
+    'z': 'KeyZ', 'ㅋ': 'KeyZ', 'x': 'KeyX', 'ㅌ': 'KeyX', 'c': 'KeyC', 'ㅊ': 'KeyC', 'v': 'KeyV', 'ㅍ': 'KeyV', 'b': 'KeyB', 'ㅠ': 'KeyB', 'n': 'KeyN', 'ㅜ': 'KeyN', 'm': 'KeyM', 'ㅡ': 'KeyM',
+    ',': 'Comma', '<': 'Comma', '.': 'Period', '>': 'Period', '/': 'Slash', '?': 'Slash',
+    ' ': 'Space', 'backspace': 'Backspace', 'tab': 'Tab', 'capslock': 'CapsLock', 'enter': 'Enter', 'shift': 'ShiftLeft', 'control': 'ControlLeft', 'alt': 'AltLeft', 'meta': 'MetaLeft'
   };
   fallbackKeyMap[bsChar] = 'Backslash';
+
+  const keyElementsMap = {};
+  const keyCounts = {};
+  let totalKeyPressCount = 0;
+  let mouseClickCount = 0;
+  let keyTimestamps = [];
+  let lastHand = 'right';
+  let isGoldenCat = false;
+  let isDevMode = false;
+  let codeBuffer = '';
+  let charBuffer = '';
+  let saveStatusTimer = null;
+
+  function showSaveStatus(text, color) {
+    saveStatus.textContent = text;
+    saveStatus.style.color = color || '#a1a1aa';
+    if (saveStatusTimer) clearTimeout(saveStatusTimer);
+    saveStatusTimer = setTimeout(function() {
+      saveStatus.textContent = '자동 저장 켜짐';
+      saveStatus.style.color = '#a1a1aa';
+    }, 1800);
+  }
+
+  function encodeClipboardCode() {
+    const compactKeys = {};
+    Object.keys(keyCounts).forEach(function(code) {
+      if (keyCounts[code] > 0) compactKeys[code] = keyCounts[code];
+    });
+    const payload = {
+      t: totalKeyPressCount,
+      m: mouseClickCount,
+      k: compactKeys,
+      g: isGoldenCat ? 1 : 0,
+      d: isDevMode ? 1 : 0
+    };
+    return 'BONGO1:' + btoa(JSON.stringify(payload));
+  }
+
+  function decodeClipboardCode(rawText) {
+    if (!rawText || typeof rawText !== 'string') return null;
+    const trimmed = rawText.trim();
+    if (!trimmed.startsWith('BONGO1:')) return null;
+    const parsed = JSON.parse(atob(trimmed.slice(7)));
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      totalKeyPressCount: Number.isFinite(parsed.t) && parsed.t >= 0 ? Math.floor(parsed.t) : 0,
+      mouseClickCount: Number.isFinite(parsed.m) && parsed.m >= 0 ? Math.floor(parsed.m) : 0,
+      keyCounts: parsed.k && typeof parsed.k === 'object' ? parsed.k : {},
+      isGoldenCat: Boolean(parsed.g),
+      isDevMode: Boolean(parsed.d)
+    };
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        totalKeyPressCount: totalKeyPressCount,
+        mouseClickCount: mouseClickCount,
+        keyCounts: keyCounts,
+        isGoldenCat: isGoldenCat,
+        isDevMode: isDevMode
+      }));
+    } catch (e) {
+      showSaveStatus('저장 불가(브라우저 제한)', '#f87171');
+    }
+  }
+
+  function applyCountsToUI() {
+    countDisplay.textContent = '총 타수: ' + totalKeyPressCount;
+    mouseClickDisplay.textContent = '마우스: ' + mouseClickCount + '회';
+    Object.keys(keyElementsMap).forEach(function(lowerCode) {
+      const item = keyElementsMap[lowerCode];
+      item.countEl.textContent = String(keyCounts[item.code] || 0);
+    });
+  }
+
+  function applyVisualModes() {
+    const fillVal = isGoldenCat ? 'url(#gold-grad)' : 'white';
+    const parts = ['cat-head', 'cat-ear-left', 'cat-ear-right', 'paw-left', 'paw-right'];
+    parts.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('fill', fillVal);
+    });
+
+    const sparkles = document.getElementById('gold-sparkles');
+    const bg = document.getElementById('cat-bg');
+
+    if (isGoldenCat) {
+      container.classList.add('golden-mode');
+      if (sparkles) sparkles.style.display = 'block';
+      if (bg) bg.setAttribute('fill', '#FFFBEB');
+    } else {
+      container.classList.remove('golden-mode');
+      if (sparkles) sparkles.style.display = 'none';
+      if (bg) bg.setAttribute('fill', 'white');
+    }
+
+    if (isDevMode) {
+      container.classList.add('dev-mode');
+      catSvgWrapper.style.setProperty('display', 'none', 'important');
+      devArtPre.style.setProperty('display', 'flex', 'important');
+      keyDisplay.style.color = '#38bdf8';
+    } else {
+      container.classList.remove('dev-mode');
+      devArtPre.style.setProperty('display', 'none', 'important');
+      catSvgWrapper.style.setProperty('display', 'block', 'important');
+      keyDisplay.style.color = isGoldenCat ? '#FFD700' : '#ffb8b8';
+    }
+  }
+
+  function applyDecodedData(data, mergeMode) {
+    if (mergeMode) {
+      totalKeyPressCount += data.totalKeyPressCount;
+      mouseClickCount += data.mouseClickCount;
+      Object.keys(keyCounts).forEach(function(code) {
+        const addVal = data.keyCounts[code];
+        if (Number.isFinite(addVal) && addVal > 0) {
+          keyCounts[code] = (keyCounts[code] || 0) + Math.floor(addVal);
+        }
+      });
+      isGoldenCat = isGoldenCat || data.isGoldenCat;
+      isDevMode = isDevMode || data.isDevMode;
+    } else {
+      totalKeyPressCount = data.totalKeyPressCount;
+      mouseClickCount = data.mouseClickCount;
+      Object.keys(keyCounts).forEach(function(code) {
+        const val = data.keyCounts[code];
+        keyCounts[code] = Number.isFinite(val) && val >= 0 ? Math.floor(val) : 0;
+      });
+      isGoldenCat = data.isGoldenCat;
+      isDevMode = data.isDevMode;
+    }
+
+    applyCountsToUI();
+    applyVisualModes();
+    saveState();
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return false;
+      applyDecodedData({
+        totalKeyPressCount: Number.isFinite(parsed.totalKeyPressCount) ? Math.floor(parsed.totalKeyPressCount) : 0,
+        mouseClickCount: Number.isFinite(parsed.mouseClickCount) ? Math.floor(parsed.mouseClickCount) : 0,
+        keyCounts: parsed.keyCounts || {},
+        isGoldenCat: Boolean(parsed.isGoldenCat),
+        isDevMode: Boolean(parsed.isDevMode)
+      }, false);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   function resolveTargetKey(event) {
     if (event.code) {
@@ -301,51 +511,27 @@
     return null;
   }
 
-  function applyGoldenCatUI(active, updateText) {
-    const fillVal = active ? 'url(#gold-grad)' : 'white';
-    const parts = ['cat-head', 'cat-ear-left', 'cat-ear-right', 'paw-left', 'paw-right'];
-    parts.forEach(function(id) {
-      const el = document.getElementById(id);
-      if (el) el.setAttribute('fill', fillVal);
-    });
-    const sparkles = document.getElementById('gold-sparkles');
-    const bg = document.getElementById('cat-bg');
-    if (active) {
-      container.classList.add('golden-mode');
-      if (sparkles) sparkles.style.display = 'block';
-      if (bg) bg.setAttribute('fill', '#FFFBEB');
-      keyDisplay.style.color = '#FFD700';
-      if (updateText) keyDisplay.textContent = '★ 황금 고양이! ★';
-    } else {
-      container.classList.remove('golden-mode');
-      if (sparkles) sparkles.style.display = 'none';
-      if (bg) bg.setAttribute('fill', 'white');
-      keyDisplay.style.color = '#ffb8b8';
-      if (updateText) keyDisplay.textContent = '입력: [ 일반 모드 ]';
-    }
-  }
-
   function toggleGoldenCat() {
     isGoldenCat = !isGoldenCat;
-    applyGoldenCatUI(isGoldenCat, true);
-    saveLocal();
+    applyVisualModes();
+    if (!isDevMode) {
+      keyDisplay.textContent = isGoldenCat ? '★ 황금 고양이! ★' : '입력: [ 일반 모드 ]';
+    }
+    saveState();
   }
 
-  function syncAllUI() {
-    countDisplay.textContent = '총 타수: ' + totalKeyPressCount;
-    mouseClickDisplay.textContent = '마우스: ' + mouseClickCount + '회';
-    Object.keys(keyElementsMap).forEach(function(k) {
-      const item = keyElementsMap[k];
-      if (item && item.countEl) {
-        item.countEl.textContent = String(keyCounts[item.code] || 0);
-      }
-    });
-    applyGoldenCatUI(isGoldenCat, false);
+  function toggleDeveloperMode() {
+    isDevMode = !isDevMode;
+    applyVisualModes();
+    keyDisplay.textContent = isDevMode ? '★ 개발자 모드! ★' : '입력: [ 고양이 복귀 ]';
+    saveState();
   }
 
   function updateKPS() {
     const now = Date.now();
-    keyTimestamps = keyTimestamps.filter(function(time) { return now - time < 1000; });
+    keyTimestamps = keyTimestamps.filter(function(time) {
+      return now - time < 1000;
+    });
     kpsDisplay.textContent = keyTimestamps.length.toFixed(1) + ' KPS';
   }
 
@@ -356,9 +542,7 @@
     const rowDiv = document.createElement('div');
     rowDiv.className = 'bongo-kb-row';
     rowKeys.forEach(function(keyInfo) {
-      if (typeof keyCounts[keyInfo.code] !== 'number') {
-        keyCounts[keyInfo.code] = 0;
-      }
+      keyCounts[keyInfo.code] = 0;
       const keyEl = document.createElement('div');
       keyEl.className = 'bongo-key';
       keyEl.style.setProperty('width', keyInfo.w, 'important');
@@ -369,117 +553,92 @@
 
       const countSpan = document.createElement('span');
       countSpan.className = 'bongo-key-count';
-      countSpan.textContent = String(keyCounts[keyInfo.code]);
+      countSpan.textContent = '0';
 
       keyEl.appendChild(labelSpan);
       keyEl.appendChild(countSpan);
       rowDiv.appendChild(keyEl);
 
-      keyElementsMap[keyInfo.code.toLowerCase()] = {
-        el: keyEl,
-        countEl: countSpan,
-        code: keyInfo.code
-      };
+      keyElementsMap[keyInfo.code.toLowerCase()] = { el: keyEl, countEl: countSpan, code: keyInfo.code };
     });
     kbContainer.appendChild(rowDiv);
   });
 
-  // --- 하단 버튼 바 (다른 사이트로 이동/합산용) ---
-  const btnBar = document.createElement('div');
-  btnBar.className = 'bongo-btn-bar';
-  container.appendChild(btnBar);
+  if (loadState()) {
+    keyDisplay.textContent = '입력: [ 기록 복원됨 ]';
+    showSaveStatus('이전 기록 복원됨', '#51cf66');
+  }
 
-  const exportBtn = document.createElement('button');
-  exportBtn.className = 'bongo-ctrl-btn';
-  exportBtn.textContent = '기록 복사';
-  exportBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    const compactKeys = {};
-    Object.keys(keyCounts).forEach(function(k) {
-      if (keyCounts[k] > 0) compactKeys[k] = keyCounts[k];
-    });
-    const code = 'BC1:' + btoa(JSON.stringify({
-      t: totalKeyPressCount,
-      m: mouseClickCount,
-      k: compactKeys,
-      g: isGoldenCat ? 1 : 0
-    }));
+  // 클립보드 복사
+  copyBtn.addEventListener('click', function() {
+    this.blur();
+    const code = encodeClipboardCode();
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(code).then(function() {
-        exportBtn.textContent = '복사 완료!';
-        setTimeout(function() { exportBtn.textContent = '기록 복사'; }, 1500);
+        showSaveStatus('클립보드에 복사됨!', '#51cf66');
       }).catch(function() {
-        prompt('아래 코드를 복사해서 다른 사이트에 붙여넣으세요:', code);
+        prompt('아래 코드를 복사하세요 (Ctrl+C):', code);
       });
     } else {
-      prompt('아래 코드를 복사해서 다른 사이트에 붙여넣으세요:', code);
+      prompt('아래 코드를 복사하세요 (Ctrl+C):', code);
     }
   });
-  btnBar.appendChild(exportBtn);
 
-  const importBtn = document.createElement('button');
-  importBtn.className = 'bongo-ctrl-btn';
-  importBtn.textContent = '불러오기';
-  importBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    const input = prompt('다른 사이트에서 복사한 코드를 붙여넣으세요 (BC1:...):');
-    if (!input) return;
+  // 클립보드 불러오기 (자동 읽기 실패 시 입력창 표시)
+  pasteBtn.addEventListener('click', async function() {
+    this.blur();
+    let raw = '';
     try {
-      const trimmed = input.trim();
-      if (!trimmed.startsWith('BC1:')) throw new Error('invalid');
-      const parsed = JSON.parse(atob(trimmed.slice(4)));
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        raw = await navigator.clipboard.readText();
+      }
+    } catch (e) {}
 
+    if (!raw || !raw.trim().startsWith('BONGO1:')) {
+      raw = prompt('복사한 봉고캣 기록 코드(BONGO1:...)를 붙여넣으세요:', raw || '') || '';
+    }
+    if (!raw) return;
+
+    try {
+      const data = decodeClipboardCode(raw);
+      if (!data) {
+        showSaveStatus('유효하지 않은 코드', '#f87171');
+        return;
+      }
       const hasCurrent = totalKeyPressCount > 0 || mouseClickCount > 0;
       const shouldMerge = hasCurrent
-        ? confirm('현재 사이트의 기록과 합산할까요?\n[확인] 합산하기 (현재 + 불러온 기록)\n[취소] 불러온 기록으로 덮어쓰기')
+        ? confirm('현재 사이트 기록과 합산할까요?\n[확인] 합산하기 (현재 + 불러온 기록)\n[취소] 불러온 기록으로 덮어쓰기')
         : false;
 
-      if (shouldMerge) {
-        totalKeyPressCount += (parsed.t || 0);
-        mouseClickCount += (parsed.m || 0);
-        if (parsed.k) {
-          Object.keys(parsed.k).forEach(function(code) {
-            keyCounts[code] = (keyCounts[code] || 0) + (parsed.k[code] || 0);
-          });
-        }
-        isGoldenCat = isGoldenCat || Boolean(parsed.g);
-      } else {
-        totalKeyPressCount = parsed.t || 0;
-        mouseClickCount = parsed.m || 0;
-        Object.keys(keyCounts).forEach(function(code) { keyCounts[code] = 0; });
-        if (parsed.k) {
-          Object.keys(parsed.k).forEach(function(code) {
-            keyCounts[code] = parsed.k[code] || 0;
-          });
-        }
-        isGoldenCat = Boolean(parsed.g);
-      }
-      saveLocal();
-      syncAllUI();
-      keyDisplay.textContent = shouldMerge ? '입력: [ 합산 완료 ]' : '입력: [ 불러오기 완료 ]';
-    } catch (err) {
-      alert('올바른 봉고캣 기록 코드가 아닙니다.');
+      applyDecodedData(data, shouldMerge);
+      keyDisplay.textContent = shouldMerge ? '입력: [ 기록 합산됨 ]' : '입력: [ 기록 복원됨 ]';
+      showSaveStatus(shouldMerge ? '기록 합산 완료!' : '기록 불러오기 완료!', '#51cf66');
+    } catch (e) {
+      showSaveStatus('코드 해석 실패', '#f87171');
     }
   });
-  btnBar.appendChild(importBtn);
 
-  const resetBtn = document.createElement('button');
-  resetBtn.className = 'bongo-ctrl-btn danger';
-  resetBtn.textContent = '초기화';
-  resetBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    if (confirm('현재 사이트의 누적 기록을 0으로 초기화할까요?')) {
-      totalKeyPressCount = 0;
-      mouseClickCount = 0;
-      Object.keys(keyCounts).forEach(function(code) { keyCounts[code] = 0; });
-      saveLocal();
-      syncAllUI();
-      keyDisplay.textContent = '입력: [ 초기화됨 ]';
-    }
+  // 초기화
+  resetBtn.addEventListener('click', function() {
+    this.blur();
+    if (!confirm('저장된 타수, 마우스 클릭, 모드 기록을 모두 초기화할까요?')) return;
+    totalKeyPressCount = 0;
+    mouseClickCount = 0;
+    keyTimestamps = [];
+    isGoldenCat = false;
+    isDevMode = false;
+    Object.keys(keyCounts).forEach(function(code) {
+      keyCounts[code] = 0;
+    });
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+    applyCountsToUI();
+    applyVisualModes();
+    updateKPS();
+    keyDisplay.textContent = '입력: [ 초기화됨 ]';
+    showSaveStatus('기록 초기화 완료', '#fbbf24');
   });
-  btnBar.appendChild(resetBtn);
-
-  if (isGoldenCat) applyGoldenCatUI(true, false);
 
   if (window._bongoKeyDown) document.removeEventListener('keydown', window._bongoKeyDown, true);
   if (window._bongoKeyUp) document.removeEventListener('keyup', window._bongoKeyUp, true);
@@ -502,26 +661,37 @@
     const resolvedCode = targetObj ? targetObj.code : (event.code || '');
     if (resolvedCode.startsWith('Key')) rawChar = resolvedCode.replace('Key', '').toLowerCase();
     else if (resolvedCode.startsWith('Digit')) rawChar = resolvedCode.replace('Digit', '');
+    else if (resolvedCode === 'Space') rawChar = ' ';
     if (rawChar) {
-      codeBuffer = (codeBuffer + rawChar).slice(-20);
+      codeBuffer = (codeBuffer + rawChar).slice(-30);
     }
-    if (event.key && event.key.length === 1 && event.key !== ' ') {
-      charBuffer = (charBuffer + event.key.toLowerCase()).slice(-20);
+    if (event.key && event.key.length === 1) {
+      charBuffer = (charBuffer + event.key.toLowerCase()).slice(-30);
     }
+
     if (codeBuffer.endsWith('rhxodbs1130') || charBuffer.endsWith('고태윤1130')) {
       codeBuffer = '';
       charBuffer = '';
       toggleGoldenCat();
     }
+    if (codeBuffer.endsWith('rhxodbs roqkfwk') || charBuffer.endsWith('고태윤 개발자')) {
+      codeBuffer = '';
+      charBuffer = '';
+      toggleDeveloperMode();
+    }
 
     if (targetObj && targetObj.code) {
       const realCode = targetObj.code;
       keyCounts[realCode] = (keyCounts[realCode] || 0) + 1;
-      if (targetObj.el) targetObj.el.classList.add('active');
-      if (targetObj.countEl) targetObj.countEl.textContent = String(keyCounts[realCode]);
+      if (targetObj.el) {
+        targetObj.el.classList.add('active');
+      }
+      if (targetObj.countEl) {
+        targetObj.countEl.textContent = String(keyCounts[realCode]);
+      }
     }
 
-    saveLocal();
+    saveState();
 
     const pawLeft = document.getElementById('paw-left');
     const pawRight = document.getElementById('paw-right');
@@ -559,22 +729,22 @@
   };
 
   window._bongoMouseDown = function(event) {
-    if (event.target && typeof event.target.closest === 'function' && event.target.closest('.bongo-btn-bar')) {
-      return;
-    }
+    if (event.target && event.target.closest && event.target.closest('.bongo-ctrl-bar')) return;
+
     mouseClickCount++;
     mouseClickDisplay.textContent = '마우스: ' + mouseClickCount + '회';
-    saveLocal();
-
     let btnName = event.button === 2 ? '우클릭' : (event.button === 1 ? '휠클릭' : '좌클릭');
     keyDisplay.textContent = '입력: [ ' + btnName + ' ]';
+
+    saveState();
+
     const mouseObj = document.getElementById('mouse-obj');
     if (mouseObj) {
       mouseObj.style.transform = 'translate(0, 3px) scale(0.95)';
     }
   };
 
-  window._bongoMouseUp = function(event) {
+  window._bongoMouseUp = function() {
     const mouseObj = document.getElementById('mouse-obj');
     if (mouseObj) {
       mouseObj.style.transform = 'translate(0, 0) scale(1)';
@@ -586,5 +756,5 @@
   document.addEventListener('mousedown', window._bongoMouseDown, true);
   document.addEventListener('mouseup', window._bongoMouseUp, true);
 
-  console.log('봉고캣 위젯(자동 저장 + 복사/합산 버전)이 실행되었습니다.');
+  console.log('봉고캣 위젯 (클립보드 복사/불러오기 + 자동 저장 포함) 실행 완료!');
 })();
