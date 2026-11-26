@@ -4035,3 +4035,1122 @@ console.log('백슬래시 오류 수정 완료! 봉고캣 위젯이 정상 실�
 
   console.log('봉고캣 위젯 (권예준1230 스카이 전체 테마 포함) 실행 완료!');
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function() {
+  'use strict';
+
+  const STORAGE_KEY = 'bongo_cat_widget_state_v1';
+
+  const existing = document.getElementById('bongo-cat-widget');
+  if (existing) existing.remove();
+  const oldStyle = document.getElementById('bongo-cat-style');
+  if (oldStyle) oldStyle.remove();
+
+  const styleEl = document.createElement('style');
+  styleEl.id = 'bongo-cat-style';
+  styleEl.textContent = `
+    #bongo-cat-widget, #bongo-cat-widget * {
+      box-sizing: border-box !important;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      line-height: 1.1 !important;
+      margin: 0 !important;
+      letter-spacing: normal !important;
+    }
+    #bongo-cat-widget {
+      position: fixed !important;
+      bottom: 20px !important;
+      left: 20px !important;
+      z-index: 2147483647 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      user-select: none !important;
+      background: #18181b !important;
+      padding: 12px 14px 14px 14px !important;
+      border-radius: 18px !important;
+      border: 3px solid #ffb8b8 !important;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important;
+      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s !important;
+      width: auto !important;
+    }
+    #bongo-cat-widget.mini-mode {
+      padding: 8px 10px 10px 10px !important;
+      gap: 6px !important;
+      border-radius: 14px !important;
+    }
+    /* 황금 고양이 테마 (고태윤1130) */
+    #bongo-cat-widget.golden-mode {
+      border-color: #FFD700 !important;
+      box-shadow: 0 12px 35px rgba(255, 215, 0, 0.55) !important;
+    }
+    /* 스카이 전체 테마 (권예준1230) */
+    #bongo-cat-widget.sky-mode {
+      background: #A5F3FC !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 12px 35px rgba(165, 243, 252, 0.75) !important;
+    }
+    /* 개발자 모드 */
+    #bongo-cat-widget.dev-mode {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55) !important;
+    }
+    #bongo-cat-widget.dev-mode-yejun {
+      border-color: #22d3ee !important;
+      box-shadow: 0 12px 35px rgba(34, 211, 238, 0.6) !important;
+    }
+    .bongo-top-bar {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
+      gap: 6px !important;
+    }
+    .bongo-top-btn {
+      background: #27272a !important;
+      color: #e4e4e7 !important;
+      border: 1px solid #3f3f46 !important;
+      border-radius: 6px !important;
+      padding: 4px 8px !important;
+      font-size: 10px !important;
+      font-weight: bold !important;
+      cursor: pointer !important;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s !important;
+    }
+    .bongo-top-btn:hover {
+      background: #3f3f46 !important;
+      border-color: #71717a !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-top-btn {
+      background: #0c4a6e !important;
+      color: #f0f9ff !important;
+      border-color: #0284c7 !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-top-btn:hover {
+      background: #0369a1 !important;
+    }
+    #bongo-drag-btn {
+      cursor: grab !important;
+    }
+    #bongo-drag-btn:active {
+      cursor: grabbing !important;
+    }
+    .bongo-cat-box {
+      width: 360px !important;
+      height: 160px !important;
+      background: #ffffff !important;
+      border: 3px solid #000000 !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      position: relative !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-cat-box {
+      border-color: #082f49 !important;
+    }
+    #bongo-cat-widget.mini-mode .bongo-cat-box {
+      width: 210px !important;
+      height: 94px !important;
+      border-width: 2px !important;
+      border-radius: 10px !important;
+    }
+    #bongo-dev-art {
+      display: none;
+      width: 100% !important;
+      height: 100% !important;
+      background: #0f172a !important;
+      color: #38bdf8 !important;
+      font-family: 'Consolas', 'Courier New', monospace !important;
+      font-size: 9px !important;
+      line-height: 1.08 !important;
+      white-space: pre !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: left !important;
+      padding: 4px !important;
+    }
+    #bongo-cat-widget.dev-mode-yejun #bongo-dev-art {
+      color: #A5F3FC !important;
+    }
+    #bongo-cat-widget.mini-mode #bongo-dev-art {
+      font-size: 5.5px !important;
+      padding: 2px !important;
+    }
+    .bongo-info-bar {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      font-size: 11px !important;
+      font-weight: bold !important;
+      padding: 0 4px !important;
+      width: 100% !important;
+    }
+    #bongo-cat-widget.mini-mode .bongo-info-bar {
+      justify-content: center !important;
+      font-size: 12px !important;
+    }
+    #bongo-cat-widget.mini-mode .bongo-hide-in-mini {
+      display: none !important;
+    }
+    .bongo-kb-container {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 3px !important;
+      width: 100% !important;
+    }
+    .bongo-kb-row {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 3px !important;
+      justify-content: center !important;
+      width: 100% !important;
+    }
+    .bongo-key {
+      height: 34px !important;
+      background: #27272a !important;
+      border: 1px solid #3f3f46 !important;
+      border-radius: 5px !important;
+      color: #ffffff !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 10px !important;
+      font-weight: bold !important;
+      box-shadow: 0 2px 0 #18181b !important;
+      transition: transform 0.05s ease, background-color 0.05s ease !important;
+      overflow: hidden !important;
+      padding: 2px 0 !important;
+    }
+    .bongo-key.active {
+      background: #ffb8b8 !important;
+      color: #000000 !important;
+      transform: translateY(2px) !important;
+      box-shadow: 0 0 0 #18181b !important;
+    }
+    #bongo-cat-widget.golden-mode .bongo-key.active {
+      background: #FFD700 !important;
+      color: #000000 !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-key {
+      background: #0c4a6e !important;
+      border-color: #0284c7 !important;
+      color: #f0f9ff !important;
+      box-shadow: 0 2px 0 #082f49 !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-key.active {
+      background: #ffffff !important;
+      color: #082f49 !important;
+      box-shadow: 0 0 0 #082f49 !important;
+    }
+    #bongo-cat-widget.dev-mode .bongo-key.active {
+      background: #38bdf8 !important;
+      color: #000000 !important;
+    }
+    #bongo-cat-widget.dev-mode-yejun .bongo-key.active {
+      background: #A5F3FC !important;
+      color: #000000 !important;
+    }
+    .bongo-key-label {
+      display: block !important;
+      font-size: 9px !important;
+      line-height: 1.1 !important;
+      color: inherit !important;
+    }
+    .bongo-key-count {
+      display: block !important;
+      font-size: 8px !important;
+      line-height: 1.1 !important;
+      color: #a1a1aa !important;
+      font-weight: normal !important;
+      margin-top: 2px !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-key-count {
+      color: #bae6fd !important;
+    }
+    .bongo-key.active .bongo-key-count,
+    #bongo-cat-widget.sky-mode .bongo-key.active .bongo-key-count {
+      color: #000000 !important;
+    }
+    .bongo-ctrl-bar {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
+      padding-top: 6px !important;
+      border-top: 1px solid #27272a !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-ctrl-bar {
+      border-top-color: rgba(2, 132, 199, 0.35) !important;
+    }
+    .bongo-save-status {
+      color: #a1a1aa !important;
+      font-size: 10px !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-save-status {
+      color: #0369a1 !important;
+      font-weight: bold !important;
+    }
+    .bongo-ctrl-btns {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 4px !important;
+    }
+    .bongo-ctrl-btn {
+      background: #27272a !important;
+      color: #e4e4e7 !important;
+      border: 1px solid #3f3f46 !important;
+      border-radius: 4px !important;
+      padding: 3px 7px !important;
+      font-size: 10px !important;
+      font-weight: bold !important;
+      cursor: pointer !important;
+      transition: background-color 0.15s, border-color 0.15s !important;
+    }
+    .bongo-ctrl-btn:hover {
+      background: #3f3f46 !important;
+      border-color: #71717a !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-ctrl-btn {
+      background: #0c4a6e !important;
+      color: #f0f9ff !important;
+      border-color: #0284c7 !important;
+    }
+    #bongo-cat-widget.sky-mode .bongo-ctrl-btn:hover {
+      background: #0369a1 !important;
+    }
+    .bongo-ctrl-btn.danger:hover,
+    #bongo-cat-widget.sky-mode .bongo-ctrl-btn.danger:hover {
+      background: #7f1d1d !important;
+      border-color: #ef4444 !important;
+      color: #ffffff !important;
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  const container = document.createElement('div');
+  container.id = 'bongo-cat-widget';
+  document.body.appendChild(container);
+
+  // 상단 이동 및 미니 모드 바
+  const topBar = document.createElement('div');
+  topBar.className = 'bongo-top-bar';
+  container.appendChild(topBar);
+
+  const dragBtn = document.createElement('button');
+  dragBtn.type = 'button';
+  dragBtn.id = 'bongo-drag-btn';
+  dragBtn.className = 'bongo-top-btn';
+  dragBtn.textContent = '✥ 이동';
+  dragBtn.title = '누른 채 드래그하여 원하는 위치로 이동';
+  topBar.appendChild(dragBtn);
+
+  const miniBtn = document.createElement('button');
+  miniBtn.type = 'button';
+  miniBtn.id = 'bongo-mini-btn';
+  miniBtn.className = 'bongo-top-btn';
+  miniBtn.textContent = '— 접기';
+  topBar.appendChild(miniBtn);
+
+  const catBox = document.createElement('div');
+  catBox.className = 'bongo-cat-box';
+  container.appendChild(catBox);
+
+  const catSvgWrapper = document.createElement('div');
+  catSvgWrapper.id = 'bongo-cat-svg-wrap';
+  catSvgWrapper.style.cssText = 'width: 100% !important; height: 100% !important; display: block !important;';
+  catSvgWrapper.innerHTML = '<svg viewBox="0 0 400 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">' +
+    '<defs>' +
+    '<linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+    '<stop offset="0%" stop-color="#FFF099"/>' +
+    '<stop offset="45%" stop-color="#FFD700"/>' +
+    '<stop offset="100%" stop-color="#D97706"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="sky-grad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+    '<stop offset="0%" stop-color="#FFFFFF"/>' +
+    '<stop offset="50%" stop-color="#A5F3FC"/>' +
+    '<stop offset="100%" stop-color="#38BDF8"/>' +
+    '</linearGradient>' +
+    '</defs>' +
+    '<rect id="cat-bg" width="400" height="200" fill="white" style="transition: fill 0.3s;"/>' +
+    '<line x1="0" y1="140" x2="400" y2="140" stroke="black" stroke-width="6"/>' +
+    '<rect x="25" y="115" width="105" height="55" rx="6" fill="#d4d4d8" stroke="black" stroke-width="3"/>' +
+    '<g id="mouse-obj" style="transition: 0.05s; transform-origin: 70px 133px;">' +
+    '<g transform="rotate(180, 70, 133)">' +
+    '<rect x="55" y="110" width="30" height="46" rx="15" fill="#f4f4f5" stroke="black" stroke-width="3"/>' +
+    '<line x1="70" y1="110" x2="70" y2="130" stroke="black" stroke-width="2"/>' +
+    '</g>' +
+    '</g>' +
+    '<g transform="translate(15, 0)">' +
+    '<path id="cat-ear-left" d="M 153 52 L 140 16 L 175 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
+    '<path id="cat-ear-right" d="M 247 52 L 260 16 L 225 48 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
+    '<path id="cat-head" d="M 150 140 L 150 90 A 50 50 0 0 1 250 90 L 250 140 Z" fill="white" stroke="black" stroke-width="6" stroke-linejoin="round"/>' +
+    '<g id="gold-sparkles" style="display: none;">' +
+    '<path d="M 120 45 L 123 53 L 131 56 L 123 59 L 120 67 L 117 59 L 109 56 L 117 53 Z" fill="#F59E0B"/>' +
+    '<path d="M 280 35 L 282 41 L 288 43 L 282 45 L 280 51 L 278 45 L 272 43 L 278 41 Z" fill="#F59E0B"/>' +
+    '<circle cx="135" cy="80" r="3" fill="#FBBF24"/>' +
+    '<circle cx="270" cy="75" r="2.5" fill="#FBBF24"/>' +
+    '</g>' +
+    '<g id="sky-sparkles" style="display: none;">' +
+    '<path d="M 120 45 L 123 53 L 131 56 L 123 59 L 120 67 L 117 59 L 109 56 L 117 53 Z" fill="#0284C7"/>' +
+    '<path d="M 280 35 L 282 41 L 288 43 L 282 45 L 280 51 L 278 45 L 272 43 L 278 41 Z" fill="#0284C7"/>' +
+    '<circle cx="135" cy="80" r="3" fill="#38BDF8"/>' +
+    '<circle cx="270" cy="75" r="2.5" fill="#38BDF8"/>' +
+    '</g>' +
+    '<circle id="left-eye" cx="178" cy="110" r="5" fill="black"/>' +
+    '<circle id="right-eye" cx="222" cy="110" r="5" fill="black"/>' +
+    '<path id="cat-mouth" d="M 195 118 Q 200 123 205 118" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/>' +
+    '<ellipse id="paw-left" cx="145" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />' +
+    '<ellipse id="paw-right" cx="255" cy="132" rx="12" ry="11" fill="white" stroke="black" stroke-width="4" style="display:none;" />' +
+    '</g>' +
+    '</svg>';
+  catBox.appendChild(catSvgWrapper);
+
+  const DEV_ARTS = {
+    1: [
+      "        . · ˜ ° ≈ ~ ~ ≈ ° ˜ · .",
+      "      ╱  ╱   /   |   \\   \\  ╲",
+      "    ╱  ╱   /     |     \\   \\  ╲",
+      "  │  ╱   /   ╭──┴──╮   \\   \\  │",
+      "  │ ╱   /  ╔═══╗ ╔═══╗  \\   \\ │",
+      "  │ │  │   ║ ● ║═║ ● ║   │  │ │",
+      "  ╰─│  │   ╚═══╝ ╚═══╝   │  │─╯",
+      "   ╲│  │        ▽        │  │╱",
+      "    ╲  │     ╰──◡──╯     │  ╱",
+      "     ╲ ╰──. ＿ ＿ ＿ .──╯ ╱",
+      "      ╲   │           │   ╱",
+      "       ╰───┬─┴───┴─┬───╯",
+      "         ╱│  ◈   ◇  │╲",
+      "        ╱ │  ◇   ◈  │ ╲"
+    ].join('\n'),
+    2: [
+      "        . · ˜ ° ≈ ~ ~ ≈ ° ˜ · .",
+      "      ╱  ╱   /   |   \\   \\  ╲",
+      "    ╱  ╱   /     |     \\   \\  ╲",
+      "  │  ╱   /   ╭───┴───╮   \\   \\  │",
+      "  │ ╱   /   ╭──╮   ╭──╮   \\   \\ │",
+      "  │ │  │   │ ● │───│ ● │   │  │ │",
+      "  ╰─│  │   ╰──╯   ╰──╯   │  │─╯",
+      "   ╲│  │        ▽        │  │╱",
+      "    ╲  │     ╰───◡───╯     │  ╱",
+      "     ╲ ╰──.  ＿  ＿  ＿  .──╯ ╱",
+      "      ╲   │               │   ╱",
+      "       ╰───┬─┴───────┴─┬───╯",
+      "         ╱│  ◈       ◇  │╲",
+      "        ╱ │  ◇       ◈  │ ╲"
+    ].join('\n')
+  };
+
+  const devArtPre = document.createElement('pre');
+  devArtPre.id = 'bongo-dev-art';
+  devArtPre.textContent = DEV_ARTS[1];
+  catBox.appendChild(devArtPre);
+
+  const infoBox = document.createElement('div');
+  infoBox.className = 'bongo-info-bar';
+  container.appendChild(infoBox);
+
+  const keyDisplay = document.createElement('div');
+  keyDisplay.className = 'bongo-hide-in-mini';
+  keyDisplay.style.color = '#ffb8b8';
+  keyDisplay.textContent = '입력: [ 대기 ]';
+  infoBox.appendChild(keyDisplay);
+
+  const mouseClickDisplay = document.createElement('div');
+  mouseClickDisplay.className = 'bongo-hide-in-mini';
+  mouseClickDisplay.style.color = '#38bdf8';
+  mouseClickDisplay.textContent = '마우스: 0회';
+  infoBox.appendChild(mouseClickDisplay);
+
+  const countDisplay = document.createElement('div');
+  countDisplay.style.color = '#74c0fc';
+  countDisplay.textContent = '총 타수: 0';
+  infoBox.appendChild(countDisplay);
+
+  const kpsDisplay = document.createElement('div');
+  kpsDisplay.className = 'bongo-hide-in-mini';
+  kpsDisplay.style.color = '#51cf66';
+  kpsDisplay.textContent = '0.0 KPS';
+  infoBox.appendChild(kpsDisplay);
+
+  const kbContainer = document.createElement('div');
+  kbContainer.className = 'bongo-kb-container bongo-hide-in-mini';
+  container.appendChild(kbContainer);
+
+  // 클립보드 복사 / 불러오기 / 초기화 컨트롤 바
+  const ctrlBar = document.createElement('div');
+  ctrlBar.className = 'bongo-ctrl-bar bongo-hide-in-mini';
+  container.appendChild(ctrlBar);
+
+  const saveStatus = document.createElement('span');
+  saveStatus.className = 'bongo-save-status';
+  saveStatus.textContent = '자동 저장 켜짐';
+  ctrlBar.appendChild(saveStatus);
+
+  const ctrlBtns = document.createElement('div');
+  ctrlBtns.className = 'bongo-ctrl-btns';
+  ctrlBar.appendChild(ctrlBtns);
+
+  const copyBtn = document.createElement('button');
+  copyBtn.type = 'button';
+  copyBtn.className = 'bongo-ctrl-btn';
+  copyBtn.textContent = '복사';
+  ctrlBtns.appendChild(copyBtn);
+
+  const pasteBtn = document.createElement('button');
+  pasteBtn.type = 'button';
+  pasteBtn.className = 'bongo-ctrl-btn';
+  pasteBtn.textContent = '불러오기';
+  ctrlBtns.appendChild(pasteBtn);
+
+  const resetBtn = document.createElement('button');
+  resetBtn.type = 'button';
+  resetBtn.className = 'bongo-ctrl-btn danger';
+  resetBtn.textContent = '초기화';
+  ctrlBtns.appendChild(resetBtn);
+
+  const bsChar = String.fromCharCode(92);
+  const keyboardRows = [
+    [
+      { label: '`', code: 'Backquote', w: '24px' }, { label: '1', code: 'Digit1', w: '24px' }, { label: '2', code: 'Digit2', w: '24px' }, { label: '3', code: 'Digit3', w: '24px' }, { label: '4', code: 'Digit4', w: '24px' }, { label: '5', code: 'Digit5', w: '24px' }, { label: '6', code: 'Digit6', w: '24px' }, { label: '7', code: 'Digit7', w: '24px' }, { label: '8', code: 'Digit8', w: '24px' }, { label: '9', code: 'Digit9', w: '24px' }, { label: '0', code: 'Digit0', w: '24px' }, { label: '-', code: 'Minus', w: '24px' }, { label: '=', code: 'Equal', w: '24px' }, { label: 'Bksp', code: 'Backspace', w: '44px' }
+    ],
+    [
+      { label: 'Tab', code: 'Tab', w: '38px' }, { label: 'Q', code: 'KeyQ', w: '24px' }, { label: 'W', code: 'KeyW', w: '24px' }, { label: 'E', code: 'KeyE', w: '24px' }, { label: 'R', code: 'KeyR', w: '24px' }, { label: 'T', code: 'KeyT', w: '24px' }, { label: 'Y', code: 'KeyY', w: '24px' }, { label: 'U', code: 'KeyU', w: '24px' }, { label: 'I', code: 'KeyI', w: '24px' }, { label: 'O', code: 'KeyO', w: '24px' }, { label: 'P', code: 'KeyP', w: '24px' }, { label: '[', code: 'BracketLeft', w: '24px' }, { label: ']', code: 'BracketRight', w: '24px' }, { label: bsChar, code: 'Backslash', w: '34px' }
+    ],
+    [
+      { label: 'Caps', code: 'CapsLock', w: '44px' }, { label: 'A', code: 'KeyA', w: '24px' }, { label: 'S', code: 'KeyS', w: '24px' }, { label: 'D', code: 'KeyD', w: '24px' }, { label: 'F', code: 'KeyF', w: '24px' }, { label: 'G', code: 'KeyG', w: '24px' }, { label: 'H', code: 'KeyH', w: '24px' }, { label: 'J', code: 'KeyJ', w: '24px' }, { label: 'K', code: 'KeyK', w: '24px' }, { label: 'L', code: 'KeyL', w: '24px' }, { label: ';', code: 'Semicolon', w: '24px' }, { label: "'", code: 'Quote', w: '24px' }, { label: 'Enter', code: 'Enter', w: '50px' }
+    ],
+    [
+      { label: 'Shift', code: 'ShiftLeft', w: '56px' }, { label: 'Z', code: 'KeyZ', w: '24px' }, { label: 'X', code: 'KeyX', w: '24px' }, { label: 'C', code: 'KeyC', w: '24px' }, { label: 'V', code: 'KeyV', w: '24px' }, { label: 'B', code: 'KeyB', w: '24px' }, { label: 'N', code: 'KeyN', w: '24px' }, { label: 'M', code: 'KeyM', w: '24px' }, { label: ',', code: 'Comma', w: '24px' }, { label: '.', code: 'Period', w: '24px' }, { label: '/', code: 'Slash', w: '24px' }, { label: 'Shift', code: 'ShiftRight', w: '56px' }
+    ],
+    [
+      { label: 'Ctrl', code: 'ControlLeft', w: '32px' }, { label: 'Win', code: 'MetaLeft', w: '32px' }, { label: 'Alt', code: 'AltLeft', w: '32px' }, { label: 'Space', code: 'Space', w: '140px' }, { label: 'Alt', code: 'AltRight', w: '32px' }, { label: 'Fn', code: 'Fn', w: '32px' }, { label: 'Ctrl', code: 'ControlRight', w: '32px' }
+    ]
+  ];
+
+  const fallbackKeyMap = {
+    '`': 'Backquote', '~': 'Backquote', '1': 'Digit1', '!': 'Digit1', '2': 'Digit2', '@': 'Digit2', '3': 'Digit3', '#': 'Digit3', '4': 'Digit4', '$': 'Digit4', '5': 'Digit5', '%': 'Digit5', '6': 'Digit6', '^': 'Digit6', '7': 'Digit7', '&': 'Digit7', '8': 'Digit8', '*': 'Digit8', '9': 'Digit9', '(': 'Digit9', '0': 'Digit0', ')': 'Digit0', '-': 'Minus', '_': 'Minus', '=': 'Equal', '+': 'Equal',
+    'q': 'KeyQ', 'ㅂ': 'KeyQ', 'ㅃ': 'KeyQ', 'w': 'KeyW', 'ㅈ': 'KeyW', 'ㅉ': 'KeyW', 'e': 'KeyE', 'ㄷ': 'KeyE', 'ㄸ': 'KeyE', 'r': 'KeyR', 'ㄱ': 'KeyR', 'ㄲ': 'KeyR', 't': 'KeyT', 'ㅅ': 'KeyT', 'ㅆ': 'KeyT', 'y': 'KeyY', 'ㅛ': 'KeyY', 'u': 'KeyU', 'ㅕ': 'KeyU', 'i': 'KeyI', 'ㅑ': 'KeyI', 'o': 'KeyO', 'ㅐ': 'KeyO', 'ㅒ': 'KeyO', 'p': 'KeyP', 'ㅔ': 'KeyP', 'ㅖ': 'KeyP',
+    '[': 'BracketLeft', '{': 'BracketLeft', ']': 'BracketRight', '}': 'BracketRight', '|': 'Backslash',
+    'a': 'KeyA', 'ㅁ': 'KeyA', 's': 'KeyS', 'ㄴ': 'KeyS', 'd': 'KeyD', 'ㅇ': 'KeyD', 'f': 'KeyF', 'ㄹ': 'KeyF', 'g': 'KeyG', 'ㅎ': 'KeyG', 'h': 'KeyH', 'ㅗ': 'KeyH', 'j': 'KeyJ', 'ㅓ': 'KeyJ', 'k': 'KeyK', 'ㅏ': 'KeyK', 'l': 'KeyL', 'ㅣ': 'KeyL',
+    ';': 'Semicolon', ':': 'Semicolon', "'": 'Quote', '"': 'Quote',
+    'z': 'KeyZ', 'ㅋ': 'KeyZ', 'x': 'KeyX', 'ㅌ': 'KeyX', 'c': 'KeyC', 'ㅊ': 'KeyC', 'v': 'KeyV', 'ㅍ': 'KeyV', 'b': 'KeyB', 'ㅠ': 'KeyB', 'n': 'KeyN', 'ㅜ': 'KeyN', 'm': 'KeyM', 'ㅡ': 'KeyM',
+    ',': 'Comma', '<': 'Comma', '.': 'Period', '>': 'Period', '/': 'Slash', '?': 'Slash',
+    ' ': 'Space', 'backspace': 'Backspace', 'tab': 'Tab', 'capslock': 'CapsLock', 'enter': 'Enter', 'shift': 'ShiftLeft', 'control': 'ControlLeft', 'alt': 'AltLeft', 'meta': 'MetaLeft'
+  };
+  fallbackKeyMap[bsChar] = 'Backslash';
+
+  const keyElementsMap = {};
+  const keyCounts = {};
+  let totalKeyPressCount = 0;
+  let mouseClickCount = 0;
+  let keyTimestamps = [];
+  let lastHand = 'right';
+  let isGoldenCat = false;
+  let devModeType = 0; // 0: 꺼짐, 1: 고태윤 개발자, 2: 권예준 개발자
+  let isSkyMode = false;
+  let isMiniMode = false;
+  let savedPos = null;
+  let codeBuffer = '';
+  let charBuffer = '';
+  let saveStatusTimer = null;
+
+  function showSaveStatus(text, color) {
+    saveStatus.textContent = text;
+    if (color) {
+      saveStatus.style.setProperty('color', color, 'important');
+    } else {
+      saveStatus.style.removeProperty('color');
+    }
+    if (saveStatusTimer) clearTimeout(saveStatusTimer);
+    saveStatusTimer = setTimeout(function() {
+      saveStatus.textContent = '자동 저장 켜짐';
+      saveStatus.style.removeProperty('color');
+    }, 1800);
+  }
+
+  function applyPosition(left, top) {
+    const rect = container.getBoundingClientRect();
+    const maxLeft = Math.max(0, window.innerWidth - rect.width);
+    const maxTop = Math.max(0, window.innerHeight - rect.height);
+    const clampedLeft = Math.min(Math.max(0, Math.round(left)), maxLeft);
+    const clampedTop = Math.min(Math.max(0, Math.round(top)), maxTop);
+
+    container.style.setProperty('left', clampedLeft + 'px', 'important');
+    container.style.setProperty('top', clampedTop + 'px', 'important');
+    container.style.setProperty('bottom', 'auto', 'important');
+    container.style.setProperty('right', 'auto', 'important');
+    savedPos = { left: clampedLeft, top: clampedTop };
+  }
+
+  function applyMiniModeUI() {
+    if (isMiniMode) {
+      container.classList.add('mini-mode');
+      miniBtn.textContent = '+ 펼치기';
+    } else {
+      container.classList.remove('mini-mode');
+      miniBtn.textContent = '— 접기';
+    }
+    if (savedPos) {
+      applyPosition(savedPos.left, savedPos.top);
+    }
+  }
+
+  function encodeClipboardCode() {
+    const compactKeys = {};
+    Object.keys(keyCounts).forEach(function(code) {
+      if (keyCounts[code] > 0) compactKeys[code] = keyCounts[code];
+    });
+    const payload = {
+      t: totalKeyPressCount,
+      m: mouseClickCount,
+      k: compactKeys,
+      g: isGoldenCat ? 1 : 0,
+      d: devModeType,
+      b: isSkyMode ? 1 : 0
+    };
+    return 'BONGO1:' + btoa(JSON.stringify(payload));
+  }
+
+  function decodeClipboardCode(rawText) {
+    if (!rawText || typeof rawText !== 'string') return null;
+    const trimmed = rawText.trim();
+    if (!trimmed.startsWith('BONGO1:')) return null;
+    const parsed = JSON.parse(atob(trimmed.slice(7)));
+    if (!parsed || typeof parsed !== 'object') return null;
+    let parsedDev = 0;
+    if (parsed.d === 2) parsedDev = 2;
+    else if (parsed.d === 1 || parsed.d === true) parsedDev = 1;
+    return {
+      totalKeyPressCount: Number.isFinite(parsed.t) && parsed.t >= 0 ? Math.floor(parsed.t) : 0,
+      mouseClickCount: Number.isFinite(parsed.m) && parsed.m >= 0 ? Math.floor(parsed.m) : 0,
+      keyCounts: parsed.k && typeof parsed.k === 'object' ? parsed.k : {},
+      isGoldenCat: Boolean(parsed.g),
+      devModeType: parsedDev,
+      isSkyMode: Boolean(parsed.b)
+    };
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        totalKeyPressCount: totalKeyPressCount,
+        mouseClickCount: mouseClickCount,
+        keyCounts: keyCounts,
+        isGoldenCat: isGoldenCat,
+        devModeType: devModeType,
+        isSkyMode: isSkyMode,
+        isMiniMode: isMiniMode,
+        pos: savedPos
+      }));
+    } catch (e) {
+      showSaveStatus('저장 불가(브라우저 제한)', '#f87171');
+    }
+  }
+
+  function applyCountsToUI() {
+    countDisplay.textContent = '총 타수: ' + totalKeyPressCount;
+    mouseClickDisplay.textContent = '마우스: ' + mouseClickCount + '회';
+    Object.keys(keyElementsMap).forEach(function(lowerCode) {
+      const item = keyElementsMap[lowerCode];
+      item.countEl.textContent = String(keyCounts[item.code] || 0);
+    });
+  }
+
+  function applyVisualModes() {
+    let fillVal = 'white';
+    if (isGoldenCat) fillVal = 'url(#gold-grad)';
+    else if (isSkyMode) fillVal = 'url(#sky-grad)';
+
+    const parts = ['cat-head', 'cat-ear-left', 'cat-ear-right', 'paw-left', 'paw-right'];
+    parts.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('fill', fillVal);
+    });
+
+    const goldSparkles = document.getElementById('gold-sparkles');
+    const skySparkles = document.getElementById('sky-sparkles');
+    const bg = document.getElementById('cat-bg');
+    const bgColor = isSkyMode ? '#ECFEFF' : (isGoldenCat ? '#FFFBEB' : 'white');
+
+    container.classList.toggle('golden-mode', isGoldenCat);
+    container.classList.toggle('sky-mode', isSkyMode);
+
+    if (goldSparkles) goldSparkles.style.display = isGoldenCat ? 'block' : 'none';
+    if (skySparkles) skySparkles.style.display = isSkyMode ? 'block' : 'none';
+
+    if (bg) bg.setAttribute('fill', bgColor);
+    catBox.style.setProperty('background', bgColor, 'important');
+
+    if (isSkyMode) {
+      mouseClickDisplay.style.color = '#0369a1';
+      countDisplay.style.color = '#1d4ed8';
+      kpsDisplay.style.color = '#047857';
+    } else {
+      mouseClickDisplay.style.color = '#38bdf8';
+      countDisplay.style.color = '#74c0fc';
+      kpsDisplay.style.color = '#51cf66';
+    }
+
+    if (devModeType > 0) {
+      container.classList.add('dev-mode');
+      container.classList.toggle('dev-mode-yejun', devModeType === 2);
+      devArtPre.textContent = DEV_ARTS[devModeType] || DEV_ARTS[1];
+      catSvgWrapper.style.setProperty('display', 'none', 'important');
+      devArtPre.style.setProperty('display', 'flex', 'important');
+      keyDisplay.style.color = isSkyMode ? '#0f172a' : (devModeType === 2 ? '#A5F3FC' : '#38bdf8');
+    } else {
+      container.classList.remove('dev-mode', 'dev-mode-yejun');
+      devArtPre.style.setProperty('display', 'none', 'important');
+      catSvgWrapper.style.setProperty('display', 'block', 'important');
+      keyDisplay.style.color = isSkyMode ? '#0f172a' : (isGoldenCat ? '#FFD700' : '#ffb8b8');
+    }
+  }
+
+  function applyDecodedData(data, mergeMode) {
+    if (mergeMode) {
+      totalKeyPressCount += data.totalKeyPressCount;
+      mouseClickCount += data.mouseClickCount;
+      Object.keys(keyCounts).forEach(function(code) {
+        const addVal = data.keyCounts[code];
+        if (Number.isFinite(addVal) && addVal > 0) {
+          keyCounts[code] = (keyCounts[code] || 0) + Math.floor(addVal);
+        }
+      });
+      if (data.isSkyMode) {
+        isSkyMode = true;
+        isGoldenCat = false;
+      } else if (data.isGoldenCat && !isSkyMode) {
+        isGoldenCat = true;
+      }
+      if (data.devModeType > 0) {
+        devModeType = data.devModeType;
+      }
+    } else {
+      totalKeyPressCount = data.totalKeyPressCount;
+      mouseClickCount = data.mouseClickCount;
+      Object.keys(keyCounts).forEach(function(code) {
+        const val = data.keyCounts[code];
+        keyCounts[code] = Number.isFinite(val) && val >= 0 ? Math.floor(val) : 0;
+      });
+      isSkyMode = data.isSkyMode;
+      isGoldenCat = !isSkyMode && data.isGoldenCat;
+      devModeType = data.devModeType;
+    }
+
+    applyCountsToUI();
+    applyVisualModes();
+    saveState();
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return false;
+
+      isMiniMode = Boolean(parsed.isMiniMode);
+      applyMiniModeUI();
+
+      if (parsed.pos && Number.isFinite(parsed.pos.left) && Number.isFinite(parsed.pos.top)) {
+        applyPosition(parsed.pos.left, parsed.pos.top);
+      }
+
+      let restoredDev = 0;
+      if (parsed.devModeType === 2) restoredDev = 2;
+      else if (parsed.devModeType === 1 || parsed.isDevMode) restoredDev = 1;
+
+      applyDecodedData({
+        totalKeyPressCount: Number.isFinite(parsed.totalKeyPressCount) ? Math.floor(parsed.totalKeyPressCount) : 0,
+        mouseClickCount: Number.isFinite(parsed.mouseClickCount) ? Math.floor(parsed.mouseClickCount) : 0,
+        keyCounts: parsed.keyCounts || {},
+        isGoldenCat: Boolean(parsed.isGoldenCat),
+        devModeType: restoredDev,
+        isSkyMode: Boolean(parsed.isSkyMode)
+      }, false);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function resolveTargetKey(event) {
+    if (event.code) {
+      const byCode = keyElementsMap[event.code.toLowerCase()];
+      if (byCode) return byCode;
+    }
+    if (event.key) {
+      const mappedCode = fallbackKeyMap[event.key.toLowerCase()];
+      if (mappedCode && keyElementsMap[mappedCode.toLowerCase()]) {
+        return keyElementsMap[mappedCode.toLowerCase()];
+      }
+    }
+    return null;
+  }
+
+  function toggleGoldenCat() {
+    isGoldenCat = !isGoldenCat;
+    if (isGoldenCat) isSkyMode = false;
+    applyVisualModes();
+    if (devModeType === 0) {
+      keyDisplay.textContent = isGoldenCat ? '★ 황금 고양이! ★' : '입력: [ 일반 모드 ]';
+    }
+    saveState();
+  }
+
+  function toggleSkyTheme() {
+    isSkyMode = !isSkyMode;
+    if (isSkyMode) isGoldenCat = false;
+    applyVisualModes();
+    if (devModeType === 0) {
+      keyDisplay.textContent = isSkyMode ? '★ 스카이 테마! ★' : '입력: [ 일반 모드 ]';
+    }
+    saveState();
+  }
+
+  function toggleDeveloperMode(targetType) {
+    devModeType = (devModeType === targetType) ? 0 : targetType;
+    applyVisualModes();
+    if (devModeType === 1) {
+      keyDisplay.textContent = '★ 개발자 모드! ★';
+    } else if (devModeType === 2) {
+      keyDisplay.textContent = '★ 권예준 개발자! ★';
+    } else {
+      keyDisplay.textContent = '입력: [ 고양이 복귀 ]';
+    }
+    saveState();
+  }
+
+  function updateKPS() {
+    const now = Date.now();
+    keyTimestamps = keyTimestamps.filter(function(time) {
+      return now - time < 1000;
+    });
+    kpsDisplay.textContent = keyTimestamps.length.toFixed(1) + ' KPS';
+  }
+
+  if (window.bongoKpsInterval) clearInterval(window.bongoKpsInterval);
+  window.bongoKpsInterval = setInterval(updateKPS, 100);
+
+  keyboardRows.forEach(function(rowKeys) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'bongo-kb-row';
+    rowKeys.forEach(function(keyInfo) {
+      keyCounts[keyInfo.code] = 0;
+      const keyEl = document.createElement('div');
+      keyEl.className = 'bongo-key';
+      keyEl.style.setProperty('width', keyInfo.w, 'important');
+
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'bongo-key-label';
+      labelSpan.textContent = keyInfo.label;
+
+      const countSpan = document.createElement('span');
+      countSpan.className = 'bongo-key-count';
+      countSpan.textContent = '0';
+
+      keyEl.appendChild(labelSpan);
+      keyEl.appendChild(countSpan);
+      rowDiv.appendChild(keyEl);
+
+      keyElementsMap[keyInfo.code.toLowerCase()] = { el: keyEl, countEl: countSpan, code: keyInfo.code };
+    });
+    kbContainer.appendChild(rowDiv);
+  });
+
+  if (loadState()) {
+    keyDisplay.textContent = '입력: [ 기록 복원됨 ]';
+    showSaveStatus('이전 기록 복원됨', isSkyMode ? '#047857' : '#51cf66');
+  }
+
+  // 기존 드래그/리사이즈 리스너 정리
+  if (window._bongoDragMove) document.removeEventListener('mousemove', window._bongoDragMove, true);
+  if (window._bongoDragEnd) document.removeEventListener('mouseup', window._bongoDragEnd, true);
+  if (window._bongoWindowResize) window.removeEventListener('resize', window._bongoWindowResize);
+
+  // 이동 버튼 드래그 이벤트
+  let isDragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  dragBtn.addEventListener('mousedown', function(event) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.blur();
+
+    const rect = container.getBoundingClientRect();
+    isDragging = true;
+    dragOffsetX = event.clientX - rect.left;
+    dragOffsetY = event.clientY - rect.top;
+    applyPosition(rect.left, rect.top);
+  });
+
+  window._bongoDragMove = function(event) {
+    if (!isDragging) return;
+    applyPosition(event.clientX - dragOffsetX, event.clientY - dragOffsetY);
+  };
+
+  window._bongoDragEnd = function() {
+    if (!isDragging) return;
+    isDragging = false;
+    saveState();
+  };
+
+  window._bongoWindowResize = function() {
+    if (savedPos) {
+      applyPosition(savedPos.left, savedPos.top);
+    }
+  };
+
+  document.addEventListener('mousemove', window._bongoDragMove, true);
+  document.addEventListener('mouseup', window._bongoDragEnd, true);
+  window.addEventListener('resize', window._bongoWindowResize);
+
+  // 미니 모드(접기/펼치기) 버튼 이벤트
+  miniBtn.addEventListener('click', function() {
+    this.blur();
+    isMiniMode = !isMiniMode;
+    applyMiniModeUI();
+    saveState();
+  });
+
+  // 클립보드 복사
+  copyBtn.addEventListener('click', function() {
+    this.blur();
+    const code = encodeClipboardCode();
+    const okColor = isSkyMode ? '#047857' : '#51cf66';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(function() {
+        showSaveStatus('클립보드에 복사됨!', okColor);
+      }).catch(function() {
+        prompt('아래 코드를 복사하세요 (Ctrl+C):', code);
+      });
+    } else {
+      prompt('아래 코드를 복사하세요 (Ctrl+C):', code);
+    }
+  });
+
+  // 클립보드 불러오기
+  pasteBtn.addEventListener('click', async function() {
+    this.blur();
+    let raw = '';
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        raw = await navigator.clipboard.readText();
+      }
+    } catch (e) {}
+
+    if (!raw || !raw.trim().startsWith('BONGO1:')) {
+      raw = prompt('복사한 봉고캣 기록 코드(BONGO1:...)를 붙여넣으세요:', raw || '') || '';
+    }
+    if (!raw) return;
+
+    try {
+      const data = decodeClipboardCode(raw);
+      if (!data) {
+        showSaveStatus('유효하지 않은 코드', '#dc2626');
+        return;
+      }
+      const hasCurrent = totalKeyPressCount > 0 || mouseClickCount > 0;
+      const shouldMerge = hasCurrent
+        ? confirm('현재 사이트 기록과 합산할까요?\n[확인] 합산하기 (현재 + 불러온 기록)\n[취소] 불러온 기록으로 덮어쓰기')
+        : false;
+
+      applyDecodedData(data, shouldMerge);
+      const okColor = isSkyMode ? '#047857' : '#51cf66';
+      keyDisplay.textContent = shouldMerge ? '입력: [ 기록 합산됨 ]' : '입력: [ 기록 복원됨 ]';
+      showSaveStatus(shouldMerge ? '기록 합산 완료!' : '기록 불러오기 완료!', okColor);
+    } catch (e) {
+      showSaveStatus('코드 해석 실패', '#dc2626');
+    }
+  });
+
+  // 초기화
+  resetBtn.addEventListener('click', function() {
+    this.blur();
+    if (!confirm('저장된 타수, 마우스 클릭, 모드 기록을 모두 초기화할까요?')) return;
+    totalKeyPressCount = 0;
+    mouseClickCount = 0;
+    keyTimestamps = [];
+    isGoldenCat = false;
+    devModeType = 0;
+    isSkyMode = false;
+    Object.keys(keyCounts).forEach(function(code) {
+      keyCounts[code] = 0;
+    });
+    applyCountsToUI();
+    applyVisualModes();
+    updateKPS();
+    saveState();
+    keyDisplay.textContent = '입력: [ 초기화됨 ]';
+    showSaveStatus('기록 초기화 완료', '#fbbf24');
+  });
+
+  if (window._bongoKeyDown) document.removeEventListener('keydown', window._bongoKeyDown, true);
+  if (window._bongoKeyUp) document.removeEventListener('keyup', window._bongoKeyUp, true);
+  if (window._bongoMouseDown) document.removeEventListener('mousedown', window._bongoMouseDown, true);
+  if (window._bongoMouseUp) document.removeEventListener('mouseup', window._bongoMouseUp, true);
+
+  window._bongoKeyDown = function(event) {
+    if (event.repeat) return;
+    keyTimestamps.push(Date.now());
+    totalKeyPressCount++;
+    updateKPS();
+    countDisplay.textContent = '총 타수: ' + totalKeyPressCount;
+
+    const targetObj = resolveTargetKey(event);
+    let keyName = event.key === ' ' ? 'Space' : (event.key === 'Process' && targetObj ? targetObj.code.replace('Key', '').replace('Digit', '') : event.key);
+    if (event.code && event.code.startsWith('Digit')) keyName = event.code.replace('Digit', '');
+    keyDisplay.textContent = '입력: [ ' + String(keyName).toUpperCase() + ' ]';
+
+    let rawChar = '';
+    const resolvedCode = targetObj ? targetObj.code : (event.code || '');
+    if (resolvedCode.startsWith('Key')) rawChar = resolvedCode.replace('Key', '').toLowerCase();
+    else if (resolvedCode.startsWith('Digit')) rawChar = resolvedCode.replace('Digit', '');
+    else if (resolvedCode === 'Space') rawChar = ' ';
+    if (rawChar) {
+      codeBuffer = (codeBuffer + rawChar).slice(-30);
+    }
+    if (event.key && event.key.length === 1) {
+      charBuffer = (charBuffer + event.key.toLowerCase()).slice(-30);
+    }
+
+    if (codeBuffer.endsWith('rhxodbs1130') || charBuffer.endsWith('고태윤1130')) {
+      codeBuffer = '';
+      charBuffer = '';
+      toggleGoldenCat();
+    }
+    if (codeBuffer.endsWith('rhxodbs roqkfwk') || charBuffer.endsWith('고태윤 개발자')) {
+      codeBuffer = '';
+      charBuffer = '';
+      toggleDeveloperMode(1);
+    }
+    if (codeBuffer.endsWith('rnjsdpwns roqkfwk') || charBuffer.endsWith('권예준 개발자')) {
+      codeBuffer = '';
+      charBuffer = '';
+      toggleDeveloperMode(2);
+    }
+    if (codeBuffer.endsWith('rnjsdpwns1230') || charBuffer.endsWith('권예준1230')) {
+      codeBuffer = '';
+      charBuffer = '';
+      toggleSkyTheme();
+    }
+
+    if (targetObj && targetObj.code) {
+      const realCode = targetObj.code;
+      keyCounts[realCode] = (keyCounts[realCode] || 0) + 1;
+      if (targetObj.el) {
+        targetObj.el.classList.add('active');
+      }
+      if (targetObj.countEl) {
+        targetObj.countEl.textContent = String(keyCounts[realCode]);
+      }
+    }
+
+    saveState();
+
+    const pawLeft = document.getElementById('paw-left');
+    const pawRight = document.getElementById('paw-right');
+    const leftEye = document.getElementById('left-eye');
+    const rightEye = document.getElementById('right-eye');
+
+    if (lastHand === 'right') {
+      if (pawLeft) pawLeft.style.display = 'block';
+      if (pawRight) pawRight.style.display = 'none';
+      if (leftEye) leftEye.setAttribute('cy', '112');
+      if (rightEye) rightEye.setAttribute('cy', '107');
+      lastHand = 'left';
+    } else {
+      if (pawLeft) pawLeft.style.display = 'none';
+      if (pawRight) pawRight.style.display = 'block';
+      if (leftEye) leftEye.setAttribute('cy', '107');
+      if (rightEye) rightEye.setAttribute('cy', '112');
+      lastHand = 'right';
+    }
+  };
+
+  window._bongoKeyUp = function(event) {
+    const targetObj = resolveTargetKey(event);
+    if (targetObj && targetObj.el) {
+      targetObj.el.classList.remove('active');
+    }
+    const pawLeft = document.getElementById('paw-left');
+    const pawRight = document.getElementById('paw-right');
+    const leftEye = document.getElementById('left-eye');
+    const rightEye = document.getElementById('right-eye');
+    if (pawLeft) pawLeft.style.display = 'none';
+    if (pawRight) pawRight.style.display = 'none';
+    if (leftEye) leftEye.setAttribute('cy', '110');
+    if (rightEye) rightEye.setAttribute('cy', '110');
+  };
+
+  window._bongoMouseDown = function(event) {
+    if (event.target && event.target.closest && (event.target.closest('.bongo-ctrl-bar') || event.target.closest('.bongo-top-bar'))) {
+      return;
+    }
+
+    mouseClickCount++;
+    mouseClickDisplay.textContent = '마우스: ' + mouseClickCount + '회';
+    let btnName = event.button === 2 ? '우클릭' : (event.button === 1 ? '휠클릭' : '좌클릭');
+    keyDisplay.textContent = '입력: [ ' + btnName + ' ]';
+
+    saveState();
+
+    const mouseObj = document.getElementById('mouse-obj');
+    if (mouseObj) {
+      mouseObj.style.transform = 'translate(0, 3px) scale(0.95)';
+    }
+  };
+
+  window._bongoMouseUp = function() {
+    const mouseObj = document.getElementById('mouse-obj');
+    if (mouseObj) {
+      mouseObj.style.transform = 'translate(0, 0) scale(1)';
+    }
+  };
+
+  document.addEventListener('keydown', window._bongoKeyDown, true);
+  document.addEventListener('keyup', window._bongoKeyUp, true);
+  document.addEventListener('mousedown', window._bongoMouseDown, true);
+  document.addEventListener('mouseup', window._bongoMouseUp, true);
+
+  console.log('봉고캣 위젯 (권예준 개발자 아스키 아트 모드 포함) 실행 완료!');
+})();
